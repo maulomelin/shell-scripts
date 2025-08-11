@@ -100,7 +100,7 @@ EOS
             log_info "==> Zsh shell is not configured. Configure it to use chruby by default..."
             echo >> "${HOME}/.zshrc"
             echo "${header}" >> "${HOME}/.zshrc"
-            echo "${pattern}" >> "${HOME}/.zshrc"
+            echo "${configs}" >> "${HOME}/.zshrc"
 
             # Relaunch the terminal window to apply the config updates
             log_info "Load shell config updates..."
