@@ -8,7 +8,7 @@
 ## Command Scripts
 
 * [bin/install-jekyll-ssg.zsh](bin/install-jekyll-ssg.zsh): Installs/updates Jekyll and Bundler to their latest versions.
-* [bin/install-jekyll-theme.zsh](bin/install-jekyll-theme.zsh): Installs a Jekyll theme to a project directory.
+* [bin/export-repo.zsh](bin/export-repo.zsh): Exports a repo to a target directory and removes any Git metadata.
 
 ## Utility Libraries
 
