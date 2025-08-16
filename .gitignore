@@ -1,11 +1,14 @@
-# Source: https://github.com/github/gitignore/blob/main/Global/macOS.gitignore
+### Source: Custom
+
+**/_TEMP/
+
+### Source: https://raw.githubusercontent.com/github/gitignore/HEAD/Global/macOS.gitignore
 
 # General
 .DS_Store
 .AppleDouble
 .LSOverride
-Icon[
-]
+Icon[]
 
 # Thumbnails
 ._*
