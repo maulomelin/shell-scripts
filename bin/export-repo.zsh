@@ -2,7 +2,7 @@
 #--------------------------------------+--------------------------------------#
 # SPDX-FileCopyrightText: (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier: MIT
-# SPDX-FileComment: Jekyll Theme Installer.
+# SPDX-FileComment: Repository Exporter.
 #--------------------------------------+--------------------------------------#
 # Initialize script environment.
 readonly SCRIPT_DIRPATH=$(dirname "${0}")
@@ -17,7 +17,6 @@ readonly _DEFAULT_VERBOSITY=2
 readonly _DEFAULT_BATCH=false
 readonly _VERBOSITY_REGEX="^[0-3]$"
 readonly _TIMESTAMP="+%Y%m%dT%H%M%S"
-readonly _TEMP_FOLDER="TEMP"
 
 # The usage() function displays help info. It is invoked as needed.
 function usage() {
@@ -28,21 +27,22 @@ function usage() {
     echo
     echo "Description:"
     echo
-    echo "  Jekyll Theme Installer."
-    echo "  Clones the Jekyll theme <repo> to a temp folder in project directory <dir>,"
-    echo "  then copies the {_includes, _layouts, _sass, assets} folders from the local"
-    echo "  repo to the project directory <dir>."
-    echo "  Other folders required by the theme must be copied manually."
+    echo "  Repository Exporter."
+    echo "  Copies a Git <repo> into an eponymous directory under <dir>."
+    echo "  The <repo>'s eponymous directory name is made unique to every instance this"
+    echo "  script is executed by making it a datetime-stamped slug of <repo>."
+    echo "  For example, if --repo=https://github.com/pages-theme/primer, the target dir"
+    echo "  will look like this: "github.com--pages-themes--primer--19950624T181853"."
     echo
     echo "Options:"
     echo
     echo "  -r=<repo>, --repo=<repo>"
-    echo "      A Git URL to a repository containing the desired Jekyll theme."
+    echo "      A Git URL to a repository to export."
     echo "      If not provided, defaults to the Jekyll Primer theme on GitHub:"
     echo "      [${_DEFAULT_REPO}]"
     echo
     echo "  -d=<dir>, --dir=<dir>"
-    echo "      Theme installation directory."
+    echo "      Target directory where the repository will be exported to."
     echo "      Relative paths will be based off the current working directory."
     echo "      If not provided, defaults to the current working directory:"
     echo "      [${_DEFAULT_DIR}]"
@@ -72,50 +72,42 @@ function process() {
     local repo=${1}
     local dir=${2}
 
-    # Generate a unique temp folder name based on the repo name by slugifying
-    # and timestamping it. Since this is geared towards GitHub-hosted Jekyll
-    # themes, we use the 3 trailing pathname components (domain/uname/theme).
+    # Generate a unique directory name based on the repo name by slugifying
+    # and timestamping it. Since this is geared towards GitHub-hosted repos,
+    # we use the 3 trailing pathname components (domain/user_name/repo_name).
     # It *should* work on repo URLs, remotes, and local paths...caveat emptor.
     local s
     s="${repo:t3}"                      # Extract trailing pathname components.
     s="${s// /}"                        # Collapse all spaces.
     s=${s//\//--}                       # Replace slashes with double dashes.
     s="${s}--$(date "${_TIMESTAMP}")"   # Append a timestamp.
-    s="${_TEMP_FOLDER}/${s}"            # Place under the temp folder.
-    local temp_folder="${s}"
+    local export_dir="${s}"
 
     # Display script settings.
     log_info "Script settings:"
-    log_info "  Theme repo: \t[${repo}]"
-    log_info "  Install dir:\t[${dir}]"
-    log_info "  Temp folder:\t[${temp_folder}]"
+    log_info "  Source repo: [${repo}]"
+    log_info "  Target dir:  [${dir}]"
+    log_info "  Export dir:  [${export_dir}]"
 
-    # Create the project folder.
-    log_info "Create the project folder..."
-    mkdir -p "${dir}" || abort "Cannot create directory ${dir}."
+    # Create the target folder.
+    log_info "Create the target folder..."
+    mkdir -p "${dir}" || abort "Cannot create the target directory ${dir}."
 
-    log_info "Change to the project root [${dir}]..."
+    log_info "Change to the target directory [${dir}]..."
     pushd "${dir}" || abort "Cannot change to directory ${dir}."
 
-    # Clone the theme repo to the temp folder and remove the .git directory.
-    log_info "Clone the theme repository to the temp folder [${temp_folder}]..."
-    git clone --depth=1 "${repo}" "${temp_folder}" || abort "Cannot clone repository ${repo} to ${temp_folder}."
-    log_info "Remove the .git directory to avoid cluttering the project with git metadata..."
-    rm -rf ./"${temp_folder}"/.git || abort "Cannot remove .git directory from ${temp_folder}."
-
-    # Bootstrap the theme by copying the necessary files to the project root.
-    log_info "Copy theme files to the project root [${dir}]..."
-    cp -R "${temp_folder}"/_includes .
-    cp -R "${temp_folder}"/_layouts .
-    cp -R "${temp_folder}"/_sass .
-    cp -R "${temp_folder}"/assets .
+    # Clone the repo to the target directory and remove the .git directory.
+    log_info "Clone the source repository to the export directory [${export_dir}]..."
+    git clone --depth=1 "${repo}" "${export_dir}" || abort "Cannot clone repository ${repo} to ${export_dir}."
+    log_info "Remove all Git metadata..."
+    rm -rf ./"${export_dir}"/.git || abort "Cannot remove .git directory from ${export_dir}."
 
     log_info "==> Done."
 }
 
 # The main() function handles input validation. It is the script's entry point.
 function main() {
-    log_header "Jekyll Theme Installer"
+    log_header "Repository Exporter"
 
     # Parse script arguments. Extract option values using the ${name#pattern}
     # parameter expansion pattern using the "*" glob operator in the pattern.
@@ -160,10 +152,10 @@ function main() {
     log_info "  Input args:\t[${args}]"
     log_info "  Used/Ignored:\t[${used}]/[${ignored}]"
     log_info "Effective settings:"
-    log_info "  Theme repo:\t[${repo}] (default: [${_DEFAULT_REPO}])"
-    log_info "  Install dir:\t[${dir}] (default: [${_DEFAULT_DIR}])"
-    log_info "  Verbosity:\t[${verbosity}] (default: [${_DEFAULT_VERBOSITY}])"
-    log_info "  Batch mode:\t[${batch}] (default: [${_DEFAULT_BATCH}])"
+    log_info "  Source repo: [${repo}] (default: [${_DEFAULT_REPO}])"
+    log_info "  Target dir:  [${dir}] (default: [${_DEFAULT_DIR}])"
+    log_info "  Verbosity:   [${verbosity}] (default: [${_DEFAULT_VERBOSITY}])"
+    log_info "  Batch mode:  [${batch}] (default: [${_DEFAULT_BATCH}])"
 
     # Make sure all required variables are populated.
     if [[ -z "${repo}" || -z "${dir}" || -z "${verbosity}" || -z "${batch}" ]]; then
@@ -172,16 +164,16 @@ function main() {
 
     # Prompt user for confirmation, unless in batch mode.
     if [[ "${batch}" == true ]]; then
-        log_info "Batch mode enabled. Proceed with cloning..."
+        log_info "Batch mode enabled. Proceed with export..."
     else
-        echo "Theme repo:\t[${repo}]"
-        echo "Install dir:\t[${dir}]"
+        echo "Source repo:\t[${repo}]"
+        echo "Target dir:\t[${dir}]"
         if read -q "confirm?Proceed? (y/N): "; then
             echo
-            log_info "Install Jeckyll theme..."
+            log_info "Export the repository..."
         else
             echo
-            abort "Jeckyll theme aborted."
+            abort "Repository exporting aborted."
         fi
     fi
 
