@@ -1,35 +1,39 @@
 #!/bin/zsh
-#--------------------------------------+--------------------------------------#
-# SPDX-FileCopyrightText: (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
-# SPDX-License-Identifier: MIT
-# SPDX-FileComment: Experiments/Prototypes Scratchpad/Sandbox/Playground/Lab.
-#--------------------------------------+--------------------------------------#
-# General Comments:
+# -----------------------------------------------------------------------------
+# SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
+# SPDX-License-Identifier:  MIT
+# SPDX-FileComment:         Namespace: LAB / Experiments Sandbox
+# SPDX-FileComment: <text>
 #   - This is a testing ground for all kinds of experiments.
 #   - Every experiment is defined and named within its own function.
 #   - Follow the pattern for new experiments.
-#--------------------------------------+--------------------------------------#
-# Initialize script environment.
-readonly SCRIPT_DIRPATH=$(dirname "${0}")
-readonly SCRIPT_FILENAME=$(basename "${ZSH_ARGZERO}")
-source "${SCRIPT_DIRPATH}/../lib/init.zsh"
-#--------------------------------------+--------------------------------------#
+# </text>
+# -----------------------------------------------------------------------------
 # TODO: Consider utility of a framework that prompts user to run any experiment
-# function in this module. See function at bottom of script.
-#--------------------------------------+--------------------------------------#
+#       function in this module. See function at bottom of script.
+# -----------------------------------------------------------------------------
+
+# Initialize the script environment (use portable `dirname` and `printf`).
+source "$(dirname "${0}")/../lib/init.zsh" || {
+    printf "\e[91mError: Failed to initialize script environment.\e[0m\n"
+    exit 1
+}
+
+# TODO: Update doc. ==> HERE <==
+
 
 function experiment_0032() {
     LOG_VERBOSITY=+0010
-    log_header "Something exciting!"
-    log_xxx "testing"
+    log_info_header "Something exciting!"
+    log_info_xxx "testing"
 #    display_sgr_codes
-    abort
+    err_abort
 }
 experiment_0032 "${@}"
 
 
 function experiment_0031() {
-#    log_header "Test updates to log formatting function."
+#    log_info_header "Test updates to log formatting function."
     #zsh shell_scripts/scratchpad.zsh foo bar "this isn\nnnewline" "lasv\vvr\rrtn\nnx" "some t\tt done" "*"
     local format
 
@@ -47,22 +51,22 @@ function experiment_0031() {
 #    format="red bold"
 #    format="bold"
 #    format=""
-    log_header "echo \"\$(_format \"${format}\" \${@})\""
-    log_header "${@}"
-    log_start "${@}"
-    log_end "${@}"
+    log_info_header "echo \"\$(_format \"${format}\" \${@})\""
+    log_info_header "${@}"
+    log_info_start "${@}"
+    log_info_end "${@}"
     log_info "${@}"
     log_warning "${@}"
     log_error "${@}"
     log_debug "${@}"
-    log_xxx "${@}"
+    log_info_xxx "${@}"
 
     #display_sgr_codes ; exit
 
     echo "$(_format "${format}" ${@})"
 
-    #log_header "x=\$(_format \${@})"; x=$(_format ${@}); echo ${x}
-    #log_header "x=\$(_format)"; x=$(_format); echo ${x}
+    #log_info_header "x=\$(_format \${@})"; x=$(_format ${@}); echo ${x}
+    #log_info_header "x=\$(_format)"; x=$(_format); echo ${x}
 
 #    abort
 }
@@ -70,7 +74,7 @@ experiment_0031 "${@}"
 
 
 function experiment_0030() {
-    log_header "Different types of for loops."
+    log_info_header "Different types of for loops."
 
     for i in {1..0}; do
         echo "a[${i}]"
@@ -98,7 +102,7 @@ function experiment_0029() {
 #   local w=1 x="a" y=("x" "y" "z")
 #   local -A z=("a" 1 "b" 2 "c" 3)
 #   echo ${(t)w} ${(t)x} ${(t)y} ${(t)z}
-    log_header "Print out variables in JSON-like format."
+    log_info_header "Print out variables in JSON-like format."
     local w=1; echo "\tw=1\t\t\t\t==> [${(t)w}]"
     local x="a"; echo "\tx=\"a\"\t\t\t\t==> [${(t)x}]"
     local y=("x" "y" "z"); echo "\ty=(\"x\", \"y\", \"z\")\t\t==> [${(t)y}]"
@@ -108,22 +112,22 @@ function experiment_0029() {
 
 
 function experiment_0028() {
-    log_header "Replicate experiment_0027 using log_*() calls from the framework's logging module."
-    log_start
+    log_info_header "Replicate experiment_0027 using log_*() calls from the framework's logging module."
+    log_info_start
 #    local me=${funcstack[1]:-SHELL}
-#    log_header "me = \${funcstack[1]:-SHELL} = [${me}]"
+#    log_info_header "me = \${funcstack[1]:-SHELL} = [${me}]"
     local foo="bar"
 
     function print_funcstack() {
-        log_start "I am in print_funcstack() [${foo}]"
+        log_info_start "I am in print_funcstack() [${foo}]"
         local x
         for x in ${funcstack[@]}; do log_debug "${x}"; done
         print_rev_funcstack
     }
 
     function print_rev_funcstack() {
-        log_header "print_rev_funcstack()"
-        log_start "I am in print_rev_funcstack()"
+        log_info_header "print_rev_funcstack()"
+        log_info_start "I am in print_rev_funcstack()"
         local x i
 
         log_info "I am in print_rev_funcstack() showing you funcstack[@]:"
@@ -140,21 +144,21 @@ function experiment_0028() {
     }
 
     function indirect() {
-        log_start "I am in indirect()"
+        log_info_start "I am in indirect()"
         print_funcstack
         print_rev_funcstack
-        log_end
+        log_info_end
     }
 
     log_info "I am in experiment_0028()"
     indirect
-    log_end
+    log_info_end
 }
 #experiment_0028 "${@}"
 
 
 function experiment_0027() {
-#    log_header "Explore printing logs with indents using the call stack array funcstack[@]."
+#    log_info_header "Explore printing logs with indents using the call stack array funcstack[@]."
     local me=${funcstack[1]:-SHELL}
     echo "me=[${me}]"
 
@@ -209,7 +213,7 @@ function experiment_0027() {
 
 
 function experiment_0026() {
-    log_header "Explore splitting args newline escape sequences and escape character."
+    log_info_header "Explore splitting args newline escape sequences and escape character."
 
     function sgrattrib() { echo "\e[${@}m" }
     local fmt_bold="$(sgrattrib "1")"
@@ -252,7 +256,7 @@ function experiment_0026() {
 
 
 function experiment_0025() {
-#    log_header "Search & replace."
+#    log_info_header "Search & replace."
 
     string="foo[bar]fizz[buzz]wizz[bang]cat"
     echo "original string\t\t\t[ ${string} ]"
@@ -285,7 +289,7 @@ function experiment_0025() {
 
 
 function experiment_0024() {
-    log_header "Explore other escape sequences and their effects."
+    log_info_header "Explore other escape sequences and their effects."
 
     #             1234567890123456789012345 [25 chars with escape sequences]
     #             1234 5678 9012 34567 8901 [21 chars with escape characters]
@@ -306,7 +310,7 @@ function experiment_0024() {
 
 
 function experiment_0023() {
-    log_header "Explore the escape sequence \\e."
+    log_info_header "Explore the escape sequence \\e."
 
     function sgrattrib() { echo "\e[${@}m" }
     local fmt_reset="$(sgrattrib "0")"
@@ -359,7 +363,7 @@ function experiment_0023() {
 
 
 function experiment_0022() {
-    log_header "Explore command and parameter expansion."
+    log_info_header "Explore command and parameter expansion."
 
     log_info "See IFS parameter in \"The Z Shell Manual\", v5.9, pg. 104."
     # Useful script calls for testing:
@@ -384,7 +388,7 @@ function experiment_0022() {
 
 
 function experiment_0021() {
-    log_header "Use parameter expansion flags to pad strings."
+    log_info_header "Use parameter expansion flags to pad strings."
 
     local string="string"
 #    local string=( "string" "string2" )
@@ -546,7 +550,7 @@ function experiment_0021() {
 
 
 function experiment_0020() {
-    log_header "Look at using exit codes given 'set -e' in our init module."
+    log_info_header "Look at using exit codes given 'set -e' in our init module."
 
     my_function() {
         echo "This message will NOT be printed."
@@ -556,7 +560,7 @@ function experiment_0020() {
 
 #    my_function
     echo "Function exit status: $?"
-    log_header "Experiment with _max_string_length() function."
+    log_info_header "Experiment with _max_string_length() function."
 
     len=$(_max_string_length "${@}")
     exit_code=$?
@@ -568,14 +572,14 @@ function experiment_0020() {
     exit_code=$?
     echo "output: [${len}]\texit code: [${exit_code}]"
 
-    #log_header "${@}"
+    #log_info_header "${@}"
 
 }
 #experiment_0020 "${@}"
 
 
 function experiment_0019() {
-    log_header "Split args into an array using word and newline delimiter."
+    log_info_header "Split args into an array using word and newline delimiter."
 
 if false; then
 
@@ -682,16 +686,16 @@ fi
     # $ zsh scratchpad.zsh foo bar "this isn\nnnewline" "lasv\vvr\rrtn\nnx" "some t\tt done" "*"
 
 #    log_info "banner using the scratchpad-processed args list:"
-    log_header "${lines}"
+    log_info_header "${lines}"
 #
 #    log_info "banner using the raw args list:"
-    log_header "${@}"
+    log_info_header "${@}"
 }
 #experiment_0019 "${@}"
 
 
 function experiment_0018() {
-    log_header "Debug inputs to logging functions logging newlines."
+    log_info_header "Debug inputs to logging functions logging newlines."
 
     log_info "string = \ \\ \\\ \\\\ \\\\\ 0"
     string="\\\\0"
@@ -710,21 +714,21 @@ function experiment_0018() {
     _info "_info()" ${string}
     log_info "log_info()" ${string}
 
-    log_header "this is a horizontal tab: [\t]"
-    log_header "this is a vertical tab: [\v]"
-    log_header "this is a newline: [\n]"
+    log_info_header "this is a horizontal tab: [\t]"
+    log_info_header "this is a vertical tab: [\v]"
+    log_info_header "this is a newline: [\n]"
 
-    log_info "Define a new log_xxx() to test out \_n, \_t, etc."
+    log_info "Define a new log_info_xxx() to test out \_n, \_t, etc."
     function _xxx()     { echo "${fmt_cyan}${@}${fmt_reset}" }
-    function log_xxx()  { echo "$(_log "$(_xxx "${@}")")" }
-    log_xxx "hola" ${string}
+    function log_info_xxx()  { echo "$(_log "$(_xxx "${@}")")" }
+    log_info_xxx "hola" ${string}
 
 }
 #experiment_0018 "${@}"
 
 
 function experiment_0017() {
-    log_header "Print script dirpath and name."
+    log_info_header "Print script dirpath and name."
 
     log_info "These commands respond differently inside and outside a function:"
     log_info "\t\$(dirname "\${0}")"
@@ -738,7 +742,7 @@ function experiment_0017() {
 
 
 function experiment_0016() {
-    log_header "Convert a string into an absolute path using history expansion modifiers"
+    log_info_header "Convert a string into an absolute path using history expansion modifiers"
 
     local dirs=()
     dirs+="/absolute/path"
@@ -780,7 +784,7 @@ function experiment_0016() {
 
 
 function experiment_0015() {
-    log_header "Explore discovering the types of shell parameters (manual pg. 170)"
+    log_info_header "Explore discovering the types of shell parameters (manual pg. 170)"
 
     # Try a few different things.
     typeset -l lowercase_var="HOLA" # Always converts to lowercase on assignment
@@ -832,7 +836,7 @@ function experiment_0015() {
 
 
 function experiment_0014() {
-    log_header "Explore Prompting User for Input"
+    log_info_header "Explore Prompting User for Input"
 
     echo "--- Basic Read (no explicit prompt) ---"
     echo "Please enter something:"
@@ -867,7 +871,7 @@ function experiment_0014() {
 
 
 function experiment_0013() {
-    log_header "Explore Parsing CLI Arguments manually"
+    log_info_header "Explore Parsing CLI Arguments manually"
     log_info "Requirements:"
     log_info "[P1] Support short and long flags (presence is a switch: e.g., -x, --verbose)."
     log_info "[P1] Support short and long options (param/value pair: e.g., -p=value, --param=value)."
@@ -995,7 +999,7 @@ function experiment_0013() {
 
 
 function experiment_0012() {
-    log_header "Explore Parsing CLI Arguments with 'zparseopts'"
+    log_info_header "Explore Parsing CLI Arguments with 'zparseopts'"
     log_info "Requirements:"
     log_info "1) Flags (or switches), short and long (e.g., -x, --verbose)."
     log_info "2) Options, short and long (e.g., -p=value, --param=value)."
@@ -1147,7 +1151,7 @@ function experiment_0012() {
 
 
 function experiment_0011() {
-    log_header "Capture multi-line output from a function with a null character delimiter"
+    log_info_header "Capture multi-line output from a function with a null character delimiter"
 
     # Print out elements of an array, one at a time.
     log_info "Define an array explicitly and print out its elements, one at a time."
@@ -1227,7 +1231,7 @@ function experiment_0011() {
 
 
 function experiment_0010() {
-    log_header "Set a variable to the original script filename so we can reference it"
+    log_info_header "Set a variable to the original script filename so we can reference it"
 
     local SCRIPT_NAME0=$(basename "${ZSH_ARGZERO}") # Filename of original script file.
     local SCRIPT_NAME1=$(basename "$0")             # Name of current function.
@@ -1243,7 +1247,7 @@ function experiment_0010() {
 
 
 function experiment_0009() {
-    log_header "Test rendering of logging messages"
+    log_info_header "Test rendering of logging messages"
 
 #    display_sgr_codes
     log_info "this is a sentence\nand another" "and a third"
@@ -1262,7 +1266,7 @@ function experiment_0009() {
 
 
 function experiment_0008() {
-    log_header "Capture multi-line output from a function with a newline delimiter"
+    log_info_header "Capture multi-line output from a function with a newline delimiter"
 
     #echo "${!my_var*}"
     # Output: my_var1 my_var2
@@ -1305,7 +1309,7 @@ function experiment_0008() {
 
 
 function experiment_0007() {
-    log_header "Split args into distinct lines, including newline within an arg"
+    log_info_header "Split args into distinct lines, including newline within an arg"
 
     #--------------------------------------+
     # Synopsis:     split_into_lines [<arg>*]
@@ -1386,7 +1390,7 @@ function experiment_0007() {
 
 
 function experiment_0006() {
-    log_header "Check the type of a variable"
+    log_info_header "Check the type of a variable"
 
     function type_of_var() {
         local type_sig=$(declare -p "$@" 2>/dev/null)
@@ -1427,7 +1431,7 @@ function experiment_0006() {
 
 
 function experiment_0005() {
-    log_header "Parse a variable and print out each element"
+    log_info_header "Parse a variable and print out each element"
 
 #    local data=("element1" "element2" "element3")
 #    local data=("this" "is" "text")
@@ -1452,7 +1456,7 @@ function experiment_0005() {
 
 
 function experiment_0004() {
-    log_header "Test rendering of logging messages and other variables"
+    log_info_header "Test rendering of logging messages and other variables"
 
     display_sgr_codes
 
@@ -1461,7 +1465,7 @@ function experiment_0004() {
     log_error
     log_debug
 
-    log_header "This is a banner message"
+    log_info_header "This is a banner message"
     log_warning "This is a warning message."
     log_error "This is an error message."
 
@@ -1479,7 +1483,7 @@ function experiment_0004() {
 
 
 function experiment_0003() {
-    log_header "Check a .zshrc file for specific commands and add them if necessary"
+    log_info_header "Check a .zshrc file for specific commands and add them if necessary"
 
     header="# Use chruby by default."
     pattern=$(cat <<EOS   # Parameter expansion of $(...) in here-document.
@@ -1542,7 +1546,7 @@ EOS
 
 
 function experiment_0002() {
-    log_header "Explore parsing command line options using 'getops' (2 options)"
+    log_info_header "Explore parsing command line options using 'getops' (2 options)"
 
     # Parse command line options. A leading `:` in the optstring suppresses
     # default error messaging by `getopts` and places option name in ${OPTARG}.
@@ -1566,7 +1570,7 @@ function experiment_0002() {
 
 
 function experiment_0001() {
-    log_header "Explore parsing command line options using 'getops' (1 option)"
+    log_info_header "Explore parsing command line options using 'getops' (1 option)"
 
     # --- Initialize variables with default values ---
     name="World" # Default name if -n is not provided
@@ -1617,7 +1621,7 @@ function experiment_0001() {
 # - To list all functions: print -l ${(k)functions}
 # - To create a title from each function, consider this pattern:
 #       local title="foobar"
-#       if [[ --title ]]; then echo ${title} ; else log_header ${title} ; fi
+#       if [[ --title ]]; then echo ${title} ; else log_info_header ${title} ; fi
 #--------------------------------------+--------------------------------------#
 function _framework_() {
 

@@ -1,76 +1,103 @@
-#!/bin/zsh
-#--------------------------------------+--------------------------------------#
-# SPDX-FileCopyrightText: (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
-# SPDX-License-Identifier: MIT
-# SPDX-FileComment: Repository Exporter.
-#--------------------------------------+--------------------------------------#
-# Initialize script environment.
-readonly SCRIPT_DIRPATH=$(dirname "${0}")
-readonly SCRIPT_FILENAME=$(basename "${ZSH_ARGZERO}")
-source "${SCRIPT_DIRPATH}/../lib/init.zsh"
-#--------------------------------------+--------------------------------------#
+#!/usr/bin/env zsh
+# -----------------------------------------------------------------------------
+# SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
+# SPDX-License-Identifier:  MIT
+# SPDX-FileComment:         Namespace: APP (Export Repo)
+# -----------------------------------------------------------------------------
 
-# Configure script settings.
-readonly _DEFAULT_REPO="https://github.com/pages-themes/primer"
-readonly _DEFAULT_DIR="${PWD}"
-readonly _DEFAULT_VERBOSITY=2
-readonly _DEFAULT_BATCH=false
-readonly _VERBOSITY_REGEX="^[0-3]$"
-readonly _TIMESTAMP="+%Y%m%dT%H%M%S"
-
-# The usage() function displays help info. It is invoked as needed.
-function usage() {
-    echo  #--------------------------------------+--------------------------------------#
-    echo "Usage:"
-    echo
-    echo "  ${SCRIPT_FILENAME} [-r=<repo>] [-d=<dir>] [-v=<verbosity>] [-b] [-h]"
-    echo
-    echo "Description:"
-    echo
-    echo "  Repository Exporter."
-    echo "  Copies a Git <repo> into an eponymous directory under <dir>."
-    echo "  The <repo>'s eponymous directory name is made unique to every instance this"
-    echo "  script is executed by making it a datetime-stamped slug of <repo>."
-    echo "  For example, if --repo=https://github.com/pages-theme/primer, the target dir"
-    echo "  will look like this: "github.com--pages-themes--primer--19950624T181853"."
-    echo
-    echo "Options:"
-    echo
-    echo "  -r=<repo>, --repo=<repo>"
-    echo "      A Git URL to a repository to export."
-    echo "      If not provided, defaults to the Jekyll Primer theme on GitHub:"
-    echo "      [${_DEFAULT_REPO}]"
-    echo
-    echo "  -d=<dir>, --dir=<dir>"
-    echo "      Target directory where the repository will be exported to."
-    echo "      Relative paths will be based off the current working directory."
-    echo "      If not provided, defaults to the current working directory:"
-    echo "      [${_DEFAULT_DIR}]"
-    echo
-    echo "  -v=<verbosity>, --verbosity=<verbosity>"
-    echo "      Sets level of verbosity for script messaging."
-    echo "      <verbosity> levels:"
-    echo "          0   QUIET mode: Suppress all messages."
-    echo "          1   ERROR mode: Only show error messages."
-    echo "          2   INFO mode:  Show error and info messages."
-    echo "          3   DEBUG mode: Show error, info, and debug messages."
-    echo "      On invalid values, or if not provided, it defaults to [${_DEFAULT_VERBOSITY}]."
-    echo
-    echo "  -b, --batch"
-    echo "      Force non-interactive mode. Perform actions without confirmation."
-    echo
-    echo "  -h, --help"
-    echo "      Show this help message and exit."
-    echo
+# Initialize the script environment (use portable `dirname` and `printf`).
+source "$(dirname "${0}")/../lib/init.zsh" || {
+    printf "\e[91mError: Failed to initialize script environment.\e[0m\n"
     exit 1
 }
 
-# The process() function implements the core logic. It is invoked by main().
-function process() {
+# Prevent execution if the script is being sourced.
+if [[ ${ZSH_EVAL_CONTEXT} == *:file* ]]; then
+    echo "\e[91mError: The script [${(%):-%x}] must be executed, not sourced.\e[0m"
+    return 1    # Abort sourcing and return to the caller with error.
+fi
 
-    # No need to sanitize or validate inputs; main() takes care of it.
-    local repo=${1}
-    local dir=${2}
+# Initialize private registry.
+typeset -gA _APP
+_APP[BATCH_REGEX]="^(true|false)$"
+_APP[DEFAULT_BATCH]=false
+_APP[AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
+_APP[DATETIME]="${(%):-"%D{%Y%m%dT%H%M%S}"}" # "The Z Shell Manual" v5.9, § 13.2.4, pg. 42.
+_APP[DEFAULT_VERBOSITY]=3
+log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"
+_APP[DEFAULT_REPO]="https://github.com/pages-themes/primer"
+_APP[DEFAULT_DIR]="${PWD}"
+
+# Display help documentation and exit. Invoked as needed.
+function usage() {
+# ----------------- 79-character ruler to align usage() text ------------------
+    cat << EOF
+Usage:
+
+    ${ZSH_ARGZERO:A:t} [-r=<repo>] [-d=<dir>] [-v=<level>] [-b] [-h]
+
+Description:
+
+    Copies a Git <repo> into an eponymous directory under <dir>.
+    The target dir is a slug of the <repo> name and a unique datetime stamp.
+    For example:
+
+        --repo=https://github.com/pages-theme/primer
+
+    yields the target directory:
+
+        github.com--pages-themes--primer--19950624T181853/
+
+    This allows multiple exports of the same <repo> under <dir>.
+
+Options:
+
+    -r=<repo>, --repo=<repo>
+        A Git URL to a repository to export.
+        Defaults to the Jekyll Primer theme on GitHub:
+
+            ${_APP[DEFAULT_REPO]}
+
+    -d=<dir>, --dir=<dir>
+        Target directory where the repository will be exported to.
+        Relative paths will be based off the current working directory.
+        Defaults to the current working directory:
+
+            ${_APP[DEFAULT_DIR]}
+
+    -v=<level>, --verbosity=<level>
+        Sets the display threshold for logging level.
+        Defaults to [${_APP[DEFAULT_VERBOSITY]}] if not present or invalid.
+
+        +-----------------------+---------------------+
+        |                       |   Verbosity Level   |
+        |  Log Message Display  +---------------------+
+        |                       |  0   1   2   3   4  |
+        +-----------+-----------+---------------------+
+        |           | 0/Alert   |  Y   Y   Y   Y   Y  |
+        |           | 1/Error   |  N   Y   Y   Y   Y  |
+        | Log Level | 2/Warning |  N   N   Y   Y   Y  |
+        |           | 3/Info    |  N   N   N   Y   Y  |
+        |           | 4/Debug   |  N   N   N   N   Y  |
+        +-----------+-----------+---------------------+
+
+    -b, --batch
+        Force non-interactive mode to perform actions without confirmation.
+        Defaults to [${_APP[DEFAULT_BATCH]}] if not present.
+
+    -h, --help
+        Display this help message and exit.
+EOF
+    exit 0
+}
+
+# Implement core logic. Invoked by main().
+function run() {
+
+    # Map function arguments to local variables.
+    local repo="${1}"
+    local dir="${2}"
+    local batch="${3}"
 
     # Generate a unique directory name based on the repo name by slugifying
     # and timestamping it. Since this is geared towards GitHub-hosted repos,
@@ -80,7 +107,7 @@ function process() {
     s="${repo:t3}"                      # Extract trailing pathname components.
     s="${s// /}"                        # Collapse all spaces.
     s=${s//\//--}                       # Replace slashes with double dashes.
-    s="${s}--$(date "${_TIMESTAMP}")"   # Append a timestamp.
+    s="${s}--${_APP[DATETIME]}"         # Append a datetime stamp.
     local export_dir="${s}"
 
     # Display script settings.
@@ -91,95 +118,105 @@ function process() {
 
     # Create the target folder.
     log_info "Create the target folder..."
-    mkdir -p "${dir}" || abort "Cannot create the target directory ${dir}."
+    mkdir -p "${dir}" || err_abort "Cannot create the target directory ${dir}."
 
+    # Change to the target directory.
     log_info "Change to the target directory [${dir}]..."
-    pushd "${dir}" || abort "Cannot change to directory ${dir}."
+    pushd "${dir}" || err_abort "Cannot change to directory ${dir}."
 
     # Clone the repo to the target directory and remove the .git directory.
     log_info "Clone the source repository to the export directory [${export_dir}]..."
-    git clone --depth=1 "${repo}" "${export_dir}" || abort "Cannot clone repository ${repo} to ${export_dir}."
+    git clone --depth=1 "${repo}" "${export_dir}" || err_abort "Cannot clone repository ${repo} to ${export_dir}."
     log_info "Remove all Git metadata..."
-    rm -rf ./"${export_dir}"/.git || abort "Cannot remove .git directory from ${export_dir}."
+    rm -rf ./"${export_dir}"/.git || err_abort "Cannot remove .git directory from ${export_dir}."
+
+    # Go back to the original directory.
+    log_info "Return to the original directory..."
+    popd || err_abort "Cannot return to the original directory."
 
     log_info "==> Done."
 }
 
-# The main() function handles input validation. It is the script's entry point.
+# Parse and validate CLI arguments. This is the script's entry point.
 function main() {
-    log_header "Repository Exporter"
 
-    # Parse script arguments. Extract option values using the ${name#pattern}
-    # parameter expansion pattern using the "*" glob operator in the pattern.
-    local args=( "${@}" )
-    local ignored=()
-    local used=()
-    local repo dir verbosity batch help
+    # Parse all CLI arguments.
+    local help batch verbosity dir repo
+    local args=( "${@}" ) args_used=() args_ignored=()
     while (( $# )); do
         case "$1" in
-            (-r=*|--repo=*)      repo="${1#*=}"      ; used+=(${1}) ;;
-            (-d=*|--dir=*)       dir="${1#*=}"       ; used+=(${1}) ;;
-            (-v=*|--verbosity=*) verbosity="${1#*=}" ; used+=(${1}) ;;
-            (-b|--batch)         batch=true          ; used+=(${1}) ;;
-            (-h|--help)          help=true           ; used+=(${1}) ;;
-            (*)                                        ignored+=(${1}) ;;
+            (-h|--help)          help=true           ; args_used+=(${1}) ;;
+            (-b|--batch)         batch=true          ; args_used+=(${1}) ;;
+            (-v=*|--verbosity=*) verbosity="${1#*=}" ; args_used+=(${1}) ;;
+            (-d=*|--dir=*)       dir="${1#*=}"       ; args_used+=(${1}) ;;
+            (-r=*|--repo=*)      repo="${1#*=}"      ; args_used+=(${1}) ;;
+            (*)                                        args_ignored+=(${1}) ;;
         esac
         shift
     done
 
     # Display usage information if requested.
-    if [[ "${help}" == true ]]; then
-        usage
-    fi
+    if [[ "${help}" == true ]]; then usage; fi
 
-    # Set the global verbosity mode.
-    if [[ ! "${verbosity}" =~ ${_VERBOSITY_REGEX} ]]; then
-        verbosity=${_DEFAULT_VERBOSITY}
-    fi
-    LOG_VERBOSITY=${verbosity}
+    # Validate and set the verbosity mode.
+    log_set_verbosity "${verbosity}"
+    verbosity=$(log_get_verbosity)
 
-    # Convert dir into an absolute path (step by step for maintenance).
-    dir=${dir/#"~"/${HOME}} # Expand "~" to the home directory, if present.
-    dir=${dir:a}            # Absolute path with a history expansion modifier.
-
-    # Initialize the effective variables, using defaults where necessary.
-    repo="${repo:-${_DEFAULT_REPO}}"
-    dir="${dir:-${_DEFAULT_DIR}}"
-    batch="${batch:-${_DEFAULT_BATCH}}"
-
-    # Display processed arguments.
-    log_info "Arguments processed:"
-    log_info "  Input args:\t[${args}]"
-    log_info "  Used/Ignored:\t[${used}]/[${ignored}]"
-    log_info "Effective settings:"
-    log_info "  Source repo: [${repo}] (default: [${_DEFAULT_REPO}])"
-    log_info "  Target dir:  [${dir}] (default: [${_DEFAULT_DIR}])"
-    log_info "  Verbosity:   [${verbosity}] (default: [${_DEFAULT_VERBOSITY}])"
-    log_info "  Batch mode:  [${batch}] (default: [${_DEFAULT_BATCH}])"
-
-    # Make sure all required variables are populated.
-    if [[ -z "${repo}" || -z "${dir}" || -z "${verbosity}" || -z "${batch}" ]]; then
-        abort "Invalid internal state. Check default settings."
-    fi
-
-    # Prompt user for confirmation, unless in batch mode.
-    if [[ "${batch}" == true ]]; then
-        log_info "Batch mode enabled. Proceed with export..."
+    # Validate batch mode and set to default if invalid.
+    if [[ -z ${batch} ]]; then
+        batch=${_APP[DEFAULT_BATCH]}
     else
-        echo "Source repo:\t[${repo}]"
-        echo "Target dir:\t[${dir}]"
-        if read -q "confirm?Proceed? (y/N): "; then
-            echo
-            log_info "Export the repository..."
-        else
-            echo
-            abort "Repository exporting aborted."
+        if [[ ! ${batch} =~ ${_APP[BATCH_REGEX]} ]]; then
+            log_warning "Invalid batch flag [${batch}]. Setting to default [${_APP[DEFAULT_BATCH]}]."
+            batch=${_APP[DEFAULT_BATCH]}
         fi
     fi
 
+    # Validate the target directory and set to default if invalid.
+    dir=${dir/#"~"/${HOME}} # Expand leading "^~" to the home directory.
+    dir=${dir:A}            # Absolute path via history expansion modifier.
+    dir="${dir:-${_DEFAULT_DIR}}"
+
+    # Validate the source repository by setting to default if missing.
+    repo="${repo:-${_APP[DEFAULT_REPO]}}"
+
+    # Display processed arguments.
+    log_info_header "Repository Exporter"
+    log_info "Default settings:"
+    log_info "  Source repo: [${_APP[DEFAULT_REPO]}]"
+    log_info "  Target dir:  [${_APP[DEFAULT_DIR]}]"
+    log_info "  Batch mode:  [${_APP[DEFAULT_BATCH]}]"
+    log_info "  Verbosity:   [${_APP[DEFAULT_VERBOSITY]}]"
+    log_info "Arguments processed:"
+    log_info "  Input:       [${args}]"
+    log_info "  Used:        [${args_used}]"
+    log_info "  Ignored:     [${args_ignored}]"
+    log_info "Effective settings:"
+    log_info "  Source repo: [${repo}]"
+    log_info "  Target dir:  [${dir}]"
+    log_info "  Batch mode:  [${batch}]"
+    log_info "  Verbosity:   [${verbosity}]"
+
+    # Prompt user for confirmation, unless in batch mode.
+    if [[ "${batch}" == true ]]; then
+        log_warning "Batch mode enabled. Proceeding with script."
+    else
+        read "response?Proceed? (y/N): "
+        if [[ ! ${response} =~ ${_APP[AFFIRMATIVE_REGEX]} ]]; then
+            log_info "Exiting script."
+            exit 0
+        fi
+    fi
+
+    # Check that all variables passed to run() exist.
+    if [[ -z "${repo}" || -z "${dir}" || -z "${batch}" ]]; then
+        log_error "Invalid internal state. Check default settings."
+        exit 1
+    fi
+
     # Execute the core logic.
-    process "${repo}" "${dir}"
+    run "${repo}" "${dir}" "${batch}"
 }
 
-# Call the main() script function.
+# Invoke main() with all CLI arguments.
 main "${@}"

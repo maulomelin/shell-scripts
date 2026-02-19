@@ -1,5 +1,6 @@
 ### Source: Custom
 
+**/_TMP/
 **/_TEMP/
 
 ### Source: https://raw.githubusercontent.com/github/gitignore/HEAD/Global/macOS.gitignore
@@ -8,7 +9,8 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-Icon[]
+Icon[
+]
 
 # Thumbnails
 ._*

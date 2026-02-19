@@ -1,8 +1,13 @@
 #!/usr/bin/env zsh
 # -----------------------------------------------------------------------------
-# SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
+# SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: APP (Install Jekyll SSG)
+# SPDX-FileComment:         Namespace: APP (Application Script Template)
+# SPDX-FileComment: <text>
+#   This is the base template for Zsh shell scripts.
+#   Configure the script by addressing all "TODO" tasks.
+#   TODO: Delete this "SPDX-FileComment" block and all "TODO" tasks before use.
+# </text>
 # -----------------------------------------------------------------------------
 
 # Initialize the script environment (use portable `dirname` and `printf`).
@@ -24,6 +29,7 @@ _APP[DEFAULT_BATCH]=false
 _APP[AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
 _APP[DEFAULT_VERBOSITY]=3
 log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"
+# TODO: Define additional constants and settings here.
 
 # Display help documentation and exit. Invoked as needed.
 function usage() {
@@ -35,12 +41,11 @@ Usage:
 
 Description:
 
-    Jekyll Static Site Generator (SSG) Installer.
-    Checks for Jekyll. If installed, it updates the Jekyll and Bundler gems
-    to their latest versions. Otherwise, it installs Homebrew, Ruby, updates
-    the shell config, and then installs the latest Jekyll and Bundler gems.
+    # TODO: Write a brief description of the script here.
 
 Options:
+
+    # TODO: Document additional script parameters/flags here.
 
     -v=<level>, --verbosity=<level>
         Sets the display threshold for logging level.
@@ -72,97 +77,23 @@ EOF
 function run() {
 
     # Map function arguments to local variables.
+    # TODO: Map additional function arguments to local variables here.
     local batch="${1}"
 
-    # Define state variables.
-    local zshrc_updated=false
-
-    log_info "Check if Jekyll is installed..."
-    if ( jekyll -v ) ; then
-        log_info "==> Jekyll is installed. Update gems."
-
-        # Update Jekyll and Bundler gems.
-        log_info "Update Jekyll gem..."
-        gem update jekyll
-        log_info "Update Bundler gem..."
-        gem update bundler
-    else
-        log_info "==> Jekyll is not installed. Install Jekyll..."
-
-        log_info "Check if Homebrew is installed..."
-        if ( ! brew -v ) ; then
-            log_info "==> Homebrew is not installed. Install Homebrew..."
-            # Install Homebrew.
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        else
-            log_info "==> Homebrew is installed."
-        fi
-
-        # Update Homebrew.
-        log_info "Update Homebrew..."
-        brew update
-
-        # Install Ruby tools.
-        log_info "Install Ruby tools..."
-        brew install chruby ruby-install
-
-        # Install the latest Ruby version supported by Jeckyll.
-        log_info "Install the latest Ruby version supported by Jeckyll..."
-        ruby-install ruby 3.4.1
-
-        # Configure zsh shell to use "chruby" by default.
-        # Unquoted here-document delimiter allows param expansion on $(...).
-        local header="# Use chruby by default."
-        local configs=$(cat <<EOS
-source $(brew --prefix)/opt/chruby/share/chruby/chruby.sh
-source $(brew --prefix)/opt/chruby/share/chruby/auto.sh
-chruby ruby-3.4.1
-EOS
-        )
-        local matches=$(grep -F "${configs}" "${HOME}/.zshrc")
-
-        log_info "Check if zsh is configured to use chruby by default..."
-        if [[ "${configs}" == "${matches}" ]] ; then
-            log_info "==> Zsh shell is already configured properly."
-        else
-            log_info "==> Zsh shell is not configured. Configure it to use chruby by default..."
-            echo >> "${HOME}/.zshrc"
-            echo "${header}" >> "${HOME}/.zshrc"
-            echo "${configs}" >> "${HOME}/.zshrc"
-
-            zshrc_updated=true
-        fi
-
-        # Install the latest Jekyll and Bundler gems.
-        log_info "Install the latest Jekyll gem..."
-        gem install jekyll
-        log_info "Install the latest Bundler gem..."
-        gem install bundler
-    fi
-
-    # Check versions.
-    log_info "Check Ruby version 3.4.1 ..."
-    ruby -v     # ruby 3.4.1
-    log_info "Check Jekyll version >=4.4.1 ..."
-    jekyll -v   # jekyll 4.4.1
-    log_info "Check Bundler version >=2.6.9 ..."
-    bundler -v  # bundler 2.6.9
-
-    # Run Homebrew diagnostics, as an FYI.
-    log_info "Run Homebrew diagnostics, as an FYI..."
-    brew doctor
-
-    # Relaunch the terminal window to apply config updates, if any.
-    if [[ "${zshrc_updated}" == true ]]; then
-        log_info "Load shell config updates..."
-        exec zsh    # "exec zsh" or "source ~/.zshrc"
-    fi
+    # TODO: Implement script's core logic here.
+    log_info_header "log_header()"
+    log_debug "log_debug()"
+    log_info "log_info()"
+    log_warning "log_warning()"
+    log_error "log_error()"
+    log_alert "log_alert()"
 }
 
 # Parse and validate CLI arguments. This is the script's entry point.
 function main() {
 
     # Parse all CLI arguments.
+    # TODO: Declare local variables for additional parameters/flags here.
     local help batch verbosity
     local -a args=( "${@}" ) args_used=() args_ignored=()
     while (( $# )); do
@@ -170,6 +101,7 @@ function main() {
             (-h|--help)          help=true           ; args_used+=(${1}) ;;
             (-b|--batch)         batch=true          ; args_used+=(${1}) ;;
             (-v=*|--verbosity=*) verbosity="${1#*=}" ; args_used+=(${1}) ;;
+            # TODO: Parse additional parameters/flags here.
             (*)                                        args_ignored+=(${1}) ;;
         esac
         shift
@@ -192,11 +124,14 @@ function main() {
         fi
     fi
 
-    # Display processed arguments.
-    log_info_header "Jekyll SSG (Static Site Generator) Installer/Updater"
+    # TODO: Validate/initialize additional parameters/flags here.
+
+    # Display all processed arguments.
+    log_info_header "# TODO: Give the script a short, friendly name here."
     log_info "Default settings:"
     log_info "  Batch mode:  [${_APP[DEFAULT_BATCH]}]"
     log_info "  Verbosity:   [${_APP[DEFAULT_VERBOSITY]}]"
+    # TODO: Include default settings for additional parameters/flags here.
     log_info "Arguments processed:"
     log_info "  Input:       [${args}]"
     log_info "  Used:        [${args_used}]"
@@ -204,6 +139,7 @@ function main() {
     log_info "Effective settings:"
     log_info "  Batch mode:  [${batch}]"
     log_info "  Verbosity:   [${verbosity}]"
+    # TODO: Include values for additional parameters/flags here.
 
     # Prompt user for confirmation, unless in batch mode.
     if [[ "${batch}" == true ]]; then
@@ -217,12 +153,14 @@ function main() {
     fi
 
     # Check that all variables passed to run() exist.
+    # TODO: Check additional variables passed to run() here.
     if [[ -z "${batch}" ]]; then
         log_error "Invalid internal state. Aborting script."
         exit 1
     fi
 
     # Execute the core logic.
+    # TODO: Pass additional variables to run() here.
     run "${batch}"
 }
 
