@@ -18,15 +18,15 @@ if [[ ${ZSH_EVAL_CONTEXT} == *:file* ]]; then
 fi
 
 # Initialize private registry.
-typeset -gA _APP
-_APP[BATCH_REGEX]="^(true|false)$"
-_APP[DEFAULT_BATCH]=false
-_APP[AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
-_APP[DATETIME]="${(%):-"%D{%Y%m%dT%H%M%S}"}" # "The Z Shell Manual" v5.9, § 13.2.4, pg. 42.
-_APP[DEFAULT_VERBOSITY]=3
-log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"
-_APP[DEFAULT_REPO]="https://github.com/pages-themes/primer"
-_APP[DEFAULT_DIR]="${PWD}"
+typeset -gA _APP=(
+    [BATCH_REGEX]="^(true|false)$"
+    [DEFAULT_BATCH]=false
+    [AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
+    [DATETIME]="${(%):-"%D{%Y%m%dT%H%M%S}"}" # "The Z Shell Manual" v5.9, § 13.2.4, pg. 42.
+    [DEFAULT_VERBOSITY]=3
+    [DEFAULT_REPO]="https://github.com/pages-themes/primer"
+    [DEFAULT_DIR]="${PWD}"
+)
 
 # Display help documentation and exit. Invoked as needed.
 function usage() {
@@ -159,7 +159,8 @@ function main() {
     if [[ "${help}" == true ]]; then usage; fi
 
     # Validate and set the verbosity mode.
-    log_set_verbosity "${verbosity}"
+    log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"  # Set to app default.
+    log_set_verbosity "${verbosity}"                # Change if valid.
     verbosity=$(log_get_verbosity)
 
     # Validate batch mode and set to default if invalid.

@@ -5,7 +5,7 @@
 # SPDX-FileComment:         Namespace: ERR (Error Handling)
 # -----------------------------------------------------------------------------
 
-# TODO: Make this library more robust by adding more utilities, such as:
+# TODO: Add more utilities, such as:
 #       die()           Terminate script.
 #       cleanup()       Handle the EXIT or ERR traps using the `trap` command.
 #       register_tmp()  Register of tmp dirs for cleanup() to delete upon exit.
@@ -15,8 +15,9 @@
 #       assert_file()   Check if file exists w/proper permissions before using.
 
 # Initialize private registry.
-typeset -gA _ERR
-_ERR[DEFAULT_ABORT_MESSAGE]="Catastrophic failure."
+typeset -gA _ERR=(
+    [DEFAULT_ABORT_MESSAGE]="Catastrophic failure."
+)
 
 # -----------------------------------------------------------------------------
 # Syntax:   err_abort [<message> ...]
@@ -26,6 +27,9 @@ _ERR[DEFAULT_ABORT_MESSAGE]="Catastrophic failure."
 # Details:
 #   - Logs the given <message> strings as error messages and aborts the script.
 #   - If no message is provided, a default error message is used.
+# Notes:
+#   - Useful in short-circuit evaluation expressions, such as:
+#       `{command} || err_abort "{command} failed."`
 # -----------------------------------------------------------------------------
 function err_abort() {
     local msg=${_ERR[DEFAULT_ABORT_MESSAGE]:-}

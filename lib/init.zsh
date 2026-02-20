@@ -35,7 +35,7 @@ setopt ERR_EXIT        # Exit on errors.
 setopt NO_UNSET        # Exit on undefined variables.
 setopt PIPE_FAIL       # Fail if any command in a pipeline fails.
 setopt TYPESET_SILENT  # Silence variable re-declarations.
-#setopt XTRACE          # DEBUG: Enable xtrace command tracing for debugging.
+#setopt XTRACE         # DEBUG: Trace command execution and expansion.
 
 # Source common libraries.
 #   - Source libraries only if no function name collisions are found.

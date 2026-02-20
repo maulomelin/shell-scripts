@@ -4,27 +4,33 @@
 # SPDX-License-Identifier:  MIT
 # SPDX-FileComment:         Namespace: LOG (Logging)
 # -----------------------------------------------------------------------------
+# TODO: Do we write a module init routine to validate all registry variables,
+#       such as verbosity? Do we need to ensure default/init values are valid
+#       or trust the module author? Is the latter enough for personal scripts?
+# -----------------------------------------------------------------------------
 
 # Initialize private registry.
-typeset -gA _LOG
-_LOG[TAB]="  "
-_LOG[INDENTATION]="+ " # · . +-
-_LOG[DATETIME_FORMAT]="+%Y-%m-%dT%H:%M:%S"
-_LOG[LOG_LEVEL_REGEX]="^[01234]$"
-_LOG[LOG_LEVEL_ALERT]=0
-_LOG[LOG_LEVEL_ERROR]=1
-_LOG[LOG_LEVEL_WARNING]=2
-_LOG[LOG_LEVEL_INFO]=3
-_LOG[LOG_LEVEL_DEBUG]=4
-_LOG[DEFAULT_LOG_LEVEL]=3
-_LOG[VERBOSITY_REGEX]="^[01234]$"
-_LOG[DEFAULT_VERBOSITY]=3
-_LOG[MULTILINE_MERGE_AND_SPLIT]=true  # (true|false) (Default: true)
-_LOG[MODULE_DEBUG]=false  # (true|false) (Default: false)
+typeset -gA _LOG=(
+    [TAB]="  "
+    [INDENTATION]="+ " # · . +-
+    [DATETIME_FORMAT]="+%Y-%m-%dT%H:%M:%S"
+    [VERBOSITY_REGEX]="^[01234]$"
+    [DEFAULT_VERBOSITY]=3
+    [LOG_LEVEL_REGEX]="^[01234]$"
+    [DEFAULT_LOG_LEVEL]=3
+    [LOG_LEVEL_ALERT]=0
+    [LOG_LEVEL_ERROR]=1
+    [LOG_LEVEL_WARNING]=2
+    [LOG_LEVEL_INFO]=3
+    [LOG_LEVEL_DEBUG]=4
+    [MULTILINE_MERGE_AND_SPLIT]=true  # (true|false) (Default: true)
+    [MODULE_DEBUG]=false  # (true|false) (Default: false)
+)
 
 # Initialize public registry.
-typeset -gA LOG
-LOG[verbosity]=${_LOG[DEFAULT_VERBOSITY]}
+typeset -gA LOG=(
+    [verbosity]=${_LOG[DEFAULT_VERBOSITY]}
+)
 
 # -----------------------------------------------------------------------------
 # Syntax:   log_get_verbosity
@@ -47,23 +53,21 @@ function log_get_verbosity() {
 # Args:     <level>     Verbosity level.
 # Outputs:  None.
 # Returns:  Default exit status.
-# Caution:  This function modifies the global registry. Do not call it inside a
+# Caution:  This function modifies the public registry. Do not call it inside a
 #           subshell, including: in a pipe `... | ...`, in parentheses `(...)`,
 #           or in command substitution `$(...)`, as these create subshells and
 #           registry changes will not propagate back to the parent shell.
 # Details:
-#   - Sets the verbosity level in the public registry to <level>.
-#   - If <level> is not an integer, verbosity is reset to its default value.
+#   - Validates <level>. If valid, the verbosity level in the public registry
+#     is set to <level>. If invalid, the verbosity level is not changed.
 # -----------------------------------------------------------------------------
 function log_set_verbosity() {
-    # Validate the argument and set the verbosity level accordingly.
     local verbosity=${1:-}
     if [[ ${verbosity} =~ ${_LOG[VERBOSITY_REGEX]} ]]; then
         __debug_info "Setting verbosity level to [${verbosity}]."
         LOG[verbosity]=${verbosity}
     else
-        __debug_info "Invalid verbosity level [${verbosity}]. Resetting to default [${_LOG[DEFAULT_VERBOSITY]}]."
-        LOG[verbosity]=${_LOG[DEFAULT_VERBOSITY]}
+        __debug_info "Invalid verbosity level [${verbosity}]. Staying at current level [${LOG[verbosity]}]."
     fi
 }
 
@@ -94,17 +98,16 @@ function log_set_verbosity() {
 #           log_info_header(), log_info_start(), etc.
 #   - The verbosity level sets the display threshold for logging levels.
 #     A log message is displayed only if its log level <= verbosity level:
-#       +-----------------------+---------------------+
-#       |                       |   Verbosity Level   |
-#       |  Log Message Display  +---------------------+
-#       |                       |  0   1   2   3   4  |
-#       +-----------+-----------+---------------------+
-#       |           | 0/Alert   |  Y   Y   Y   Y   Y  |
-#       |           | 1/Error   |  N   Y   Y   Y   Y  |
-#       | Log Level | 2/Warning |  N   N   Y   Y   Y  |
-#       |           | 3/Info    |  N   N   N   Y   Y  |
-#       |           | 4/Debug   |  N   N   N   N   Y  |
-#       +-----------+-----------+---------------------+
+#       +------------------+---------------------+
+#       |   Log Message    |   Verbosity Level   |
+#       |     Display      |  0   1   2   3   4  |
+#       +------------------+---------------------+
+#       |        0/Alert   |  Y   Y   Y   Y   Y  |
+#       |  Log   1/Error   |  N   Y   Y   Y   Y  |
+#       | Level  2/Warning |  N   N   Y   Y   Y  |
+#       |        3/Info    |  N   N   N   Y   Y  |
+#       |        4/Debug   |  N   N   N   N   Y  |
+#       +------------------+---------------------+
 #   - Formatting functions format a log message by adding string prefixes
 #     and/or changing its display attributes via embedded SGR codes.
 # -----------------------------------------------------------------------------
@@ -131,12 +134,6 @@ function log_debug()       { _print ${_LOG[LOG_LEVEL_DEBUG]}   "$(_prefix "$(_fo
 function _print() {
     # Set up local variables from module registry for easier access.
     local verbosity=${LOG[verbosity]:-}
-
-    # Validate verbosity and set to default if invalid.
-    if [[ ! ${verbosity} =~ ${_LOG[VERBOSITY_REGEX]} ]]; then
-        log_alert "Invalid verbosity level [${verbosity}]. Resetting to default [${_LOG[DEFAULT_VERBOSITY]}]."
-        verbosity=${_LOG[DEFAULT_VERBOSITY]}
-    fi
 
     # Validate the log level and set to default if invalid.
     local level=${1:-}

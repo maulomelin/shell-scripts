@@ -23,13 +23,13 @@ if [[ ${ZSH_EVAL_CONTEXT} == *:file* ]]; then
 fi
 
 # Initialize private registry.
-typeset -gA _APP
-_APP[BATCH_REGEX]="^(true|false)$"
-_APP[DEFAULT_BATCH]=false
-_APP[AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
-_APP[DEFAULT_VERBOSITY]=3
-log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"
-# TODO: Define additional constants and settings here.
+typeset -gA _APP=(
+    [BATCH_REGEX]="^(true|false)$"
+    [DEFAULT_BATCH]=false
+    [AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
+    [DEFAULT_VERBOSITY]="a" #3
+    # TODO: Define additional constants and settings here.
+)
 
 # Display help documentation and exit. Invoked as needed.
 function usage() {
@@ -51,17 +51,16 @@ Options:
         Sets the display threshold for logging level.
         Defaults to [${_APP[DEFAULT_VERBOSITY]}] if not present or invalid.
 
-        +-----------------------+---------------------+
-        |                       |   Verbosity Level   |
-        |  Log Message Display  +---------------------+
-        |                       |  0   1   2   3   4  |
-        +-----------+-----------+---------------------+
-        |           | 0/Alert   |  Y   Y   Y   Y   Y  |
-        |           | 1/Error   |  N   Y   Y   Y   Y  |
-        | Log Level | 2/Warning |  N   N   Y   Y   Y  |
-        |           | 3/Info    |  N   N   N   Y   Y  |
-        |           | 4/Debug   |  N   N   N   N   Y  |
-        +-----------+-----------+---------------------+
+        +------------------+---------------------+
+        |   Log Message    |   Verbosity Level   |
+        |     Display      |  0   1   2   3   4  |
+        +------------------+---------------------+
+        |        0/Alert   |  Y   Y   Y   Y   Y  |
+        |  Log   1/Error   |  N   Y   Y   Y   Y  |
+        | Level  2/Warning |  N   N   Y   Y   Y  |
+        |        3/Info    |  N   N   N   Y   Y  |
+        |        4/Debug   |  N   N   N   N   Y  |
+        +------------------+---------------------+
 
     -b, --batch
         Force non-interactive mode to perform actions without confirmation.
@@ -111,17 +110,15 @@ function main() {
     if [[ "${help}" == true ]]; then usage; fi
 
     # Validate and set the verbosity mode.
-    log_set_verbosity "${verbosity}"
+    log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"      # Set to app default.
+    log_set_verbosity "${verbosity}"                    # Change if valid.
     verbosity=$(log_get_verbosity)
 
-    # Validate batch mode and set to default if invalid.
-    if [[ -z ${batch} ]]; then
+    # Validate and set batch mode.
+    batch=${batch:-${_APP[DEFAULT_BATCH]}}              # Set to user value.
+    if [[ ! ${batch} =~ ${_APP[BATCH_REGEX]} ]]; then   # Reset if invalid.
+        log_warning "Invalid batch flag [${batch}]. Setting to default [${_APP[DEFAULT_BATCH]}]."
         batch=${_APP[DEFAULT_BATCH]}
-    else
-        if [[ ! ${batch} =~ ${_APP[BATCH_REGEX]} ]]; then
-            log_warning "Invalid batch flag [${batch}]. Setting to default [${_APP[DEFAULT_BATCH]}]."
-            batch=${_APP[DEFAULT_BATCH]}
-        fi
     fi
 
     # TODO: Validate/initialize additional parameters/flags here.
