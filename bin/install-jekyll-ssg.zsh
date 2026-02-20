@@ -46,17 +46,14 @@ Options:
         Sets the display threshold for logging level.
         Defaults to [${_APP[DEFAULT_VERBOSITY]}] if not present or invalid.
 
-        +-----------------------+---------------------+
-        |                       |   Verbosity Level   |
-        |  Log Message Display  +---------------------+
-        |                       |  0   1   2   3   4  |
-        +-----------+-----------+---------------------+
-        |           | 0/Alert   |  Y   Y   Y   Y   Y  |
-        |           | 1/Error   |  N   Y   Y   Y   Y  |
-        | Log Level | 2/Warning |  N   N   Y   Y   Y  |
-        |           | 3/Info    |  N   N   N   Y   Y  |
-        |           | 4/Debug   |  N   N   N   N   Y  |
-        +-----------+-----------+---------------------+
+            Log Message    |   Verbosity Level
+              Display      |  0   1   2   3   4
+        -------------------+--------------------
+                0/Alert    |  Y   Y   Y   Y   Y
+          Log   1/Error    |  N   Y   Y   Y   Y
+         Level  2/Warning  |  N   N   Y   Y   Y
+                3/Info     |  N   N   N   Y   Y
+                4/Debug    |  N   N   N   N   Y
 
     -b, --batch
         Force non-interactive mode to perform actions without confirmation.

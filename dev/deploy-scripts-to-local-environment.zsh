@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # -----------------------------------------------------------------------------
-# SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
+# SPDX-FileCopyrightText:   (c) 2026 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
 # SPDX-FileComment:         Namespace: APP (Deploy Scripts to Local Env)
 # -----------------------------------------------------------------------------

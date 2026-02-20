@@ -45,11 +45,11 @@ function () {
     # Common libraries.
     local lib_dirpath="${${(%):-%x}:A:h}"
     local -a libs=(
-        "lib-reg--global-registry.zsh"
-        "lib-log--logging.zsh"
-        "lib-sys--system-info.zsh"
+        "lib-ded--graveyard.zsh"
         "lib-err--error-handling.zsh"
-        "lib-ded--functions-graveyard.zsh"
+        "lib-log--logging.zsh"
+        "lib-reg--global-registry.zsh"
+        "lib-sys--system-info.zsh"
         # TODO: Add new libraries here.
     )
 

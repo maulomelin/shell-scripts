@@ -15,6 +15,7 @@
 
 * [lib/init.zsh](lib/init.zsh): Sets up the shell environment and sources all lib utilities below.
 * [lib/lib-ded--graveyard.zsh](lib/lib-ded--graveyard.zsh): Graveyard of discarded code worth keeping around for reference.
+* [lib/lib-err--error-handling.zsh](lib/lib-err--error-handling.zsh): Error handling functions.
 * [lib/lib-log--logging.zsh](lib/lib-log--logging.zsh): Structured logging for apps and libraries.
+* [lib/lib-reg--global-registry.zsh](lib/lib-reg--global-registry.zsh): Global registry of constants.
 * [lib/lib-sys--system-info.zsh](lib/lib-sys--system-info.zsh): Access to system and environment information.
-* [lib/lib-err--error-handling.zsh](lib/lib-err--error-handling.zsh): Various error handling functions.
