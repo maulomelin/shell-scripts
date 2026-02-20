@@ -7,12 +7,14 @@
 
 ## Command Scripts
 
-* [bin/install-jekyll-ssg.zsh](bin/install-jekyll-ssg.zsh): Installs/updates Jekyll and Bundler to their latest versions.
 * [bin/export-repo.zsh](bin/export-repo.zsh): Exports a repo to a target directory and removes any Git metadata.
+* [bin/install-jekyll-ssg.zsh](bin/install-jekyll-ssg.zsh): Installs/updates Jekyll and Bundler to their latest versions.
+* [bin/script-template.zsh](bin/script-template.zsh): Script template for application scripts.
 
 ## Utility Libraries
 
 * [lib/init.zsh](lib/init.zsh): Sets up the shell environment and sources all lib utilities below.
-* [lib/init-logging.zsh](lib/init-logging.zsh): Functions that perform structured logging.
-* [lib/init-sysinfo.zsh](lib/init-sysinfo.zsh): Functions that display system information.
-* [lib/init-common.zsh](lib/init-common.zsh): Functions that perform common tasks.
+* [lib/lib-ded--graveyard.zsh](lib/lib-ded--graveyard.zsh): Graveyard of discarded code worth keeping around for reference.
+* [lib/lib-log--logging.zsh](lib/lib-log--logging.zsh): Structured logging for apps and libraries.
+* [lib/lib-sys--system-info.zsh](lib/lib-sys--system-info.zsh): Access to system and environment information.
+* [lib/lib-err--error-handling.zsh](lib/lib-err--error-handling.zsh): Various error handling functions.

@@ -4,7 +4,6 @@
 # SPDX-License-Identifier:  MIT
 # SPDX-FileComment:         Namespace: ERR (Error Handling)
 # -----------------------------------------------------------------------------
-
 # TODO: Add more utilities, such as:
 #       die()           Terminate script.
 #       cleanup()       Handle the EXIT or ERR traps using the `trap` command.
@@ -13,6 +12,7 @@
 #       assert_cmd()    Check if tool is installed and available before using.
 #       assert_dir()    Check if dir exists w/proper permissions before using.
 #       assert_file()   Check if file exists w/proper permissions before using.
+# -----------------------------------------------------------------------------
 
 # Initialize private registry.
 typeset -gA _ERR=(
