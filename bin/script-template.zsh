@@ -27,7 +27,7 @@ typeset -gA _APP=(
     [BATCH_REGEX]="^(true|false)$"
     [DEFAULT_BATCH]=false
     [AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
-    [DEFAULT_VERBOSITY]="a" #3
+    [DEFAULT_VERBOSITY]=3
     # TODO: Define additional constants and settings here.
 )
 
