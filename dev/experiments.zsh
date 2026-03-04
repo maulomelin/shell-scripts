@@ -27,7 +27,7 @@ function experiment_0032() {
     log_info_header "Something exciting!"
     log_info_xxx "testing"
 #    display_sgr_codes
-    err_abort
+    sys_abort
 }
 experiment_0032 "${@}"
 
@@ -1321,7 +1321,7 @@ function experiment_0007() {
     # Globals:      None.
     # Arguments:    <arg>   XXX
     # Outputs:      Writes output string to stdout.
-    # Returns:      0
+    # Status:       return 0 (DESCRIPTION???)
     # Example:      lines=($(split_into_lines "mary had a\nbig lamb" "she did"))
     # (FIX IT!)     for l in "${lines[@]}" ; do echo "${l}" ; done
     #--------------------------------------+

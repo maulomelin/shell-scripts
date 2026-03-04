@@ -10,25 +10,24 @@
 # </text>
 # -----------------------------------------------------------------------------
 
-# Initialize the script environment (use portable `dirname` and `printf`).
+# Initialize script environment (use `dirname` and `printf` for portability).
 source "$(dirname "${0}")/../lib/init.zsh" || {
     printf "\e[91mError: Failed to initialize script environment.\e[0m\n"
     exit 1
 }
 
-# Prevent execution if the script is being sourced.
+# Prevent script sourcing.
 if [[ ${ZSH_EVAL_CONTEXT} == *:file* ]]; then
-    echo "\e[91mError: The script [${(%):-%x}] must be executed, not sourced.\e[0m"
-    return 1    # Abort sourcing and return to the caller with error.
+    log::warning "The script [${(%):-%x}] must be executed, not sourced."
+    return 1
 fi
 
 # Initialize private registry.
 typeset -gA _APP=(
-    [BATCH_REGEX]="^(true|false)$"
-    [DEFAULT_BATCH]=false
-    [AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
-    [DEFAULT_VERBOSITY]=3
-    # TODO: Define additional constants and settings here.
+    [DEFAULT_VERBOSITY]=${REG[DEFAULT_VERBOSITY]}
+    [DEFAULT_BATCH]=${REG[DEFAULT_BATCH]}
+    [DEFAULT_HELP]=${REG[DEFAULT_HELP]}
+    # TODO: Define additional app-specific constants and settings here.
 )
 
 # Display help documentation and exit. Invoked as needed.
@@ -37,6 +36,7 @@ function usage() {
     cat << EOF
 Usage:
 
+    # TODO: Add additional parameters/flags to the command interface below.
     ${ZSH_ARGZERO:A:t} [-v=<level>] [-b] [-h]
 
 Description:
@@ -62,7 +62,6 @@ Options:
 
     -b, --batch
         Force non-interactive mode to perform actions without confirmation.
-        Defaults to [${_APP[DEFAULT_BATCH]}] if not present.
 
     -h, --help
         Display this help message and exit.
@@ -74,16 +73,16 @@ EOF
 function run() {
 
     # Map function arguments to local variables.
-    # TODO: Map additional function arguments to local variables here.
     local batch="${1}"
+    # TODO: Map additional function arguments to local variables here.
 
     # TODO: Implement script's core logic here.
-    log_info_header "log_header()"
-    log_debug "log_debug()"
-    log_info "log_info()"
-    log_warning "log_warning()"
-    log_error "log_error()"
-    log_alert "log_alert()"
+    log::info_header "log::info_header()"
+    log::debug "log::debug()"
+    log::info "log::info()"
+    log::warning "log::warning()"
+    log::error "log::error()"
+    log::alert "log::alert()"
 }
 
 # Parse and validate CLI arguments. This is the script's entry point.
@@ -104,59 +103,59 @@ function main() {
         shift
     done
 
-    # Display usage information if requested.
-    if [[ "${help}" == true ]]; then usage; fi
+    # Set verbosity level.
+    log::set_verbosity "${_APP[DEFAULT_VERBOSITY]}" # Set level to app default.
+    log::set_verbosity "${verbosity}"               # Try to set to user input.
+    verbosity=$(log::get_verbosity)                 # Get actual level.
 
-    # Validate and set the verbosity mode.
-    log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"      # Set to app default.
-    log_set_verbosity "${verbosity}"                    # Change if valid.
-    verbosity=$(log_get_verbosity)
+    # Handle help requests before validating other inputs.
+    help=$(dat::validate_bool "help flag" "${help}" "${_APP[DEFAULT_HELP]}") || return 1
+    if dat::is_true "${help}"; then usage; fi
 
-    # Validate and set batch mode.
-    batch=${batch:-${_APP[DEFAULT_BATCH]}}              # Set to user value.
-    if [[ ! ${batch} =~ ${_APP[BATCH_REGEX]} ]]; then   # Reset if invalid.
-        log_warning "Invalid batch flag [${batch}]. Setting to default [${_APP[DEFAULT_BATCH]}]."
-        batch=${_APP[DEFAULT_BATCH]}
-    fi
-
+    # Validate all other inputs.
+    batch=$(dat::validate_bool "batch flag" "${batch}" "${_APP[DEFAULT_BATCH]}") || return 1
     # TODO: Validate/initialize additional parameters/flags here.
 
+    # TODO: Perform input checks that would result in a sys::abort() here.
+
     # Display all processed arguments.
-    log_info_header "# TODO: Give the script a short, friendly name here."
-    log_info "Default settings:"
-    log_info "  Batch mode:  [${_APP[DEFAULT_BATCH]}]"
-    log_info "  Verbosity:   [${_APP[DEFAULT_VERBOSITY]}]"
+    log::info_header "# TODO: Give the script a short, friendly name here."
+    log::info "Arguments processed:"
+    log::info "  Input:        [${args}]"
+    log::info "  Used:         [${args_used}]"
+    log::info "  Ignored:      [${args_ignored}]"
+    log::info "Default settings:"
     # TODO: Include default settings for additional parameters/flags here.
-    log_info "Arguments processed:"
-    log_info "  Input:       [${args}]"
-    log_info "  Used:        [${args_used}]"
-    log_info "  Ignored:     [${args_ignored}]"
-    log_info "Effective settings:"
-    log_info "  Batch mode:  [${batch}]"
-    log_info "  Verbosity:   [${verbosity}]"
+    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::info "Effective settings:"
     # TODO: Include values for additional parameters/flags here.
+    log::info "  Verbosity:    [${verbosity}]"
+    log::info "  Batch:        [${batch}]"
+    log::info "  Help:         [${help}]"
+
+    # TODO: Perform input checks that would result in a log::warning() here.
 
     # Prompt user for confirmation, unless in batch mode.
-    if [[ "${batch}" == true ]]; then
-        log_warning "Batch mode enabled. Proceeding with script."
+    if dat::is_true "${batch}"; then
+        log::warning "Batch mode enabled. Proceeding with script."
     else
         read "response?Proceed? (y/N): "
-        if [[ ! ${response} =~ ${_APP[AFFIRMATIVE_REGEX]} ]]; then
-            log_info "Exiting script."
-            exit 0
+        if ! dat::is_yes "${response}"; then
+            sys::terminate "User declined to proceed."
         fi
     fi
 
-    # Check that all variables passed to run() exist.
-    # TODO: Check additional variables passed to run() here.
-    if [[ -z "${batch}" ]]; then
-        log_error "Invalid internal state. Aborting script."
-        exit 1
+    # Check that all variables are populated before executing core logic.
+    # TODO: Add all run() arguments to the array below.
+    local -a args=( "${batch}" )
+    if [[ "${#args}" != "${#args:#}" ]]; then
+        sys::abort "Invalid state: Empty args."
     fi
 
-    # Execute the core logic.
-    # TODO: Pass additional variables to run() here.
-    run "${batch}"
+    # Execute core logic.
+    run "${args[@]}"
 }
 
 # Invoke main() with all CLI arguments.

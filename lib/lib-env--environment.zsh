@@ -2,20 +2,20 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: SYS (System Info)
+# SPDX-FileComment:         Namespace: ENV (Environment)
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# Syntax:   sys_shell_variables [<file>]
+# Syntax:   env::display_shell_variables [<file>]
 # Args:     <file>  File to write output to.
 # Outputs:  Shell environment variables to stdout, or to <file> if provided.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - If <file> is not provided, output is written to stdout.
 #   - If <file> is present, output is sent to it, else to stdout.
 #   - If <file> exists, it is overwritten; else, a new one created.
 # -----------------------------------------------------------------------------
-function sys_shell_variables() {
+function env::display_shell_variables() {
     local output="${1:-/dev/stdout}"
     printf "\n=====> SHELL VARIABLES (\`$ set\`) <=====\n" > "${output}"
     set >> "${output}"
@@ -24,11 +24,11 @@ function sys_shell_variables() {
 }
 
 # -----------------------------------------------------------------------------
-# Syntax:   sys_sgr_codes
+# Syntax:   env::display_sgr_codes
 # Args:     None.
 # Outputs:  A table showing all SGR codes from 0-255, to stderr.
 #           Includes all 8-bit foreground and background color codes.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Notes:
 #   - Text on a terminal is formatted by adding ANSI escape sequences to an
 #     output string. The escape sequence supported by "echo" and "print" is
@@ -67,7 +67,7 @@ function sys_shell_variables() {
 #   https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 #   https://www.ditig.com/256-colors-cheat-sheet
 # -----------------------------------------------------------------------------
-function sys_sgr_codes() {
+function env::display_sgr_codes() {
     local label="SGR Escape Sequence"
     local -a escseq=(
         "Display Attributes"

@@ -11,18 +11,17 @@ source "$(dirname "${0}")/../lib/init.zsh" || {
     exit 1
 }
 
-# Prevent execution if the script is being sourced.
+# Prevent script sourcing.
 if [[ ${ZSH_EVAL_CONTEXT} == *:file* ]]; then
-    echo "\e[91mError: The script [${(%):-%x}] must be executed, not sourced.\e[0m"
-    return 1    # Abort sourcing and return to the caller with error.
+    log::warning "The script [${(%):-%x}] must be executed, not sourced."
+    return 1
 fi
 
 # Initialize private registry.
 typeset -gA _APP=(
-    [BATCH_REGEX]="^(true|false)$"
-    [DEFAULT_BATCH]=false
-    [AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
-    [DEFAULT_VERBOSITY]=3
+    [DEFAULT_VERBOSITY]=${REG[DEFAULT_VERBOSITY]}
+    [DEFAULT_BATCH]=${REG[FALSE]}
+    [DEFAULT_HELP]=${REG[FALSE]}
 )
 
 # Display help documentation and exit. Invoked as needed.
@@ -44,7 +43,7 @@ Options:
 
     -v=<level>, --verbosity=<level>
         Sets the display threshold for logging level.
-        Defaults to [${_APP[DEFAULT_VERBOSITY]}] if not present or invalid.
+        Defaults to [${REG[DEFAULT_VERBOSITY]}] if not present or invalid.
 
             Log Message    |   Verbosity Level
               Display      |  0   1   2   3   4
@@ -57,7 +56,6 @@ Options:
 
     -b, --batch
         Force non-interactive mode to perform actions without confirmation.
-        Defaults to [${_APP[DEFAULT_BATCH]}] if not present.
 
     -h, --help
         Display this help message and exit.
@@ -74,37 +72,37 @@ function run() {
     # Define state variables.
     local zshrc_updated=false
 
-    log_info "Check if Jekyll is installed..."
+    log::info "Check if Jekyll is installed..."
     if ( jekyll -v ) ; then
-        log_info "==> Jekyll is installed. Update gems."
+        log::info "==> Jekyll is installed. Update gems."
 
         # Update Jekyll and Bundler gems.
-        log_info "Update Jekyll gem..."
+        log::info "Update Jekyll gem..."
         gem update jekyll
-        log_info "Update Bundler gem..."
+        log::info "Update Bundler gem..."
         gem update bundler
     else
-        log_info "==> Jekyll is not installed. Install Jekyll..."
+        log::info "==> Jekyll is not installed. Install Jekyll..."
 
-        log_info "Check if Homebrew is installed..."
+        log::info "Check if Homebrew is installed..."
         if ( ! brew -v ) ; then
-            log_info "==> Homebrew is not installed. Install Homebrew..."
+            log::info "==> Homebrew is not installed. Install Homebrew..."
             # Install Homebrew.
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         else
-            log_info "==> Homebrew is installed."
+            log::info "==> Homebrew is installed."
         fi
 
         # Update Homebrew.
-        log_info "Update Homebrew..."
+        log::info "Update Homebrew..."
         brew update
 
         # Install Ruby tools.
-        log_info "Install Ruby tools..."
+        log::info "Install Ruby tools..."
         brew install chruby ruby-install
 
         # Install the latest Ruby version supported by Jeckyll.
-        log_info "Install the latest Ruby version supported by Jeckyll..."
+        log::info "Install the latest Ruby version supported by Jeckyll..."
         ruby-install ruby 3.4.1
 
         # Configure zsh shell to use "chruby" by default.
@@ -118,11 +116,11 @@ EOS
         )
         local matches=$(grep -F "${configs}" "${HOME}/.zshrc")
 
-        log_info "Check if zsh is configured to use chruby by default..."
+        log::info "Check if zsh is configured to use chruby by default..."
         if [[ "${configs}" == "${matches}" ]] ; then
-            log_info "==> Zsh shell is already configured properly."
+            log::info "==> Zsh shell is already configured properly."
         else
-            log_info "==> Zsh shell is not configured. Configure it to use chruby by default..."
+            log::info "==> Zsh shell is not configured. Configure it to use chruby by default..."
             echo >> "${HOME}/.zshrc"
             echo "${header}" >> "${HOME}/.zshrc"
             echo "${configs}" >> "${HOME}/.zshrc"
@@ -131,27 +129,27 @@ EOS
         fi
 
         # Install the latest Jekyll and Bundler gems.
-        log_info "Install the latest Jekyll gem..."
+        log::info "Install the latest Jekyll gem..."
         gem install jekyll
-        log_info "Install the latest Bundler gem..."
+        log::info "Install the latest Bundler gem..."
         gem install bundler
     fi
 
     # Check versions.
-    log_info "Check Ruby version 3.4.1 ..."
+    log::info "Check Ruby version 3.4.1 ..."
     ruby -v     # ruby 3.4.1
-    log_info "Check Jekyll version >=4.4.1 ..."
+    log::info "Check Jekyll version >=4.4.1 ..."
     jekyll -v   # jekyll 4.4.1
-    log_info "Check Bundler version >=2.6.9 ..."
+    log::info "Check Bundler version >=2.6.9 ..."
     bundler -v  # bundler 2.6.9
 
     # Run Homebrew diagnostics, as an FYI.
-    log_info "Run Homebrew diagnostics, as an FYI..."
+    log::info "Run Homebrew diagnostics, as an FYI..."
     brew doctor
 
     # Relaunch the terminal window to apply config updates, if any.
     if [[ "${zshrc_updated}" == true ]]; then
-        log_info "Load shell config updates..."
+        log::info "Load shell config updates using \"exec zsh\"..."
         exec zsh    # "exec zsh" or "source ~/.zshrc"
     fi
 }
@@ -172,56 +170,51 @@ function main() {
         shift
     done
 
-    # Display usage information if requested.
-    if [[ "${help}" == true ]]; then usage; fi
+    # Set verbosity level.
+    log::set_verbosity "${_APP[DEFAULT_VERBOSITY]}" # Set level to app default.
+    log::set_verbosity "${verbosity}"               # Try to set to user input.
+    verbosity=$(log::get_verbosity)                 # Get actual level.
 
-    # Validate and set the verbosity mode.
-    log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"  # Set to app default.
-    log_set_verbosity "${verbosity}"                # Change if valid.
-    verbosity=$(log_get_verbosity)
+    # Handle help requests before validating other inputs.
+    help=$(dat::validate_bool "help flag" "${help}" "${_APP[DEFAULT_HELP]}") || return 1
+    if dat::is_true "${help}"; then usage; fi
 
-    # Validate batch mode and set to default if invalid.
-    if [[ -z ${batch} ]]; then
-        batch=${_APP[DEFAULT_BATCH]}
-    else
-        if [[ ! ${batch} =~ ${_APP[BATCH_REGEX]} ]]; then
-            log_warning "Invalid batch flag [${batch}]. Setting to default [${_APP[DEFAULT_BATCH]}]."
-            batch=${_APP[DEFAULT_BATCH]}
-        fi
-    fi
+    # Validate all other inputs.
+    batch=$(dat::validate_bool "batch flag" "${batch}" "${_APP[DEFAULT_BATCH]}") || return 1
 
-    # Display processed arguments.
-    log_info_header "Jekyll SSG (Static Site Generator) Installer/Updater"
-    log_info "Default settings:"
-    log_info "  Batch mode:  [${_APP[DEFAULT_BATCH]}]"
-    log_info "  Verbosity:   [${_APP[DEFAULT_VERBOSITY]}]"
-    log_info "Arguments processed:"
-    log_info "  Input:       [${args}]"
-    log_info "  Used:        [${args_used}]"
-    log_info "  Ignored:     [${args_ignored}]"
-    log_info "Effective settings:"
-    log_info "  Batch mode:  [${batch}]"
-    log_info "  Verbosity:   [${verbosity}]"
+    # Display all processed arguments.
+    log::info_header "Jekyll SSG (Static Site Generator) Installer/Updater"
+    log::info "Arguments processed:"
+    log::info "  Input:        [${args}]"
+    log::info "  Used:         [${args_used}]"
+    log::info "  Ignored:      [${args_ignored}]"
+    log::info "Default settings:"
+    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::info "Effective settings:"
+    log::info "  Verbosity:    [${verbosity}]"
+    log::info "  Batch mode:   [${batch}]"
+    log::info "  Help:         [${help}]"
 
     # Prompt user for confirmation, unless in batch mode.
-    if [[ "${batch}" == true ]]; then
-        log_warning "Batch mode enabled. Proceeding with script."
+    if dat::is_true "${batch}"; then
+        log::warning "Batch mode enabled. Proceeding with script."
     else
         read "response?Proceed? (y/N): "
-        if [[ ! ${response} =~ ${_APP[AFFIRMATIVE_REGEX]} ]]; then
-            log_info "Exiting script."
-            exit 0
+        if ! dat::is_yes "${response}"; then
+            sys::terminate "User declined to proceed."
         fi
     fi
 
-    # Check that all variables passed to run() exist.
-    if [[ -z "${batch}" ]]; then
-        log_error "Invalid internal state. Aborting script."
-        exit 1
+    # Check that all variables are populated before executing core logic.
+    local -a args=( "${batch}" )
+    if [[ "${#args}" != "${#args:#}" ]]; then
+        sys::abort "Invalid state: Empty args."
     fi
 
-    # Execute the core logic.
-    run "${batch}"
+    # Execute core logic.
+    run "${args[@]}"
 }
 
 # Invoke main() with all CLI arguments.

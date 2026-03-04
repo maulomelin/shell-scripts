@@ -23,7 +23,7 @@ if [ -z "${ZSH_NAME}" ] ; then
     return 1
 fi
 
-# Prevent direct execution. This script is designed to be sourced.
+# Prevent direct execution.
 if [[ ${ZSH_EVAL_CONTEXT} != *:file* ]]; then
     echo "\033[91mError: This script must be sourced, not executed.\033[0m"
     return 1
@@ -35,6 +35,8 @@ setopt ERR_EXIT        # Exit on errors.
 setopt NO_UNSET        # Exit on undefined variables.
 setopt PIPE_FAIL       # Fail if any command in a pipeline fails.
 setopt TYPESET_SILENT  # Silence variable re-declarations.
+setopt NO_CASE_MATCH   # Enable case-insensitive pattern matching.
+setopt EXTENDED_GLOB   # Enable extended globbing features.
 #setopt XTRACE         # DEBUG: Trace command execution and expansion.
 
 # Source common libraries.
@@ -45,11 +47,13 @@ function () {
     # Common libraries.
     local lib_dirpath="${${(%):-%x}:A:h}"
     local -a libs=(
-        "lib-ded--graveyard.zsh"
-        "lib-err--error-handling.zsh"
-        "lib-log--logging.zsh"
         "lib-reg--global-registry.zsh"
-        "lib-sys--system-info.zsh"
+        "lib-log--logging.zsh"
+        "lib-sys--system.zsh"
+        "lib-dat--data-type-safety.zsh"
+        "lib-env--environment.zsh"
+        "lib-err--error-handling.zsh"
+        "lib-ded--graveyard.zsh"
         # TODO: Add new libraries here.
     )
 
@@ -57,7 +61,7 @@ function () {
     # Syntax:   _extract_function_names_from_file <file>
     # Args:     <file>      A file name.
     # Outputs:  An array of function names found inside <file> using regexes.
-    # Returns:  Default exit status.
+    # Status:   Default status.
     # Notes:    This function extracts function names to check for name collisions.
     #           Locally scoped functions are likely intended to shadow an original.
     #           If we assume indented function definitions to be locally scoped and
@@ -66,9 +70,9 @@ function () {
     function _extract_function_names_from_file() {
         local file=${1:-}
         # Define RegEx patterns to extract function names (fnames) from files.
-        local re_pre="^function[[:space:]]+"               # Left of fname.
-        local re_fn="[a-zA-Z0-9_]+"                        # fname.
-        local re_post="[[:space:]]*\(\)[[:space:]]+\{.*$"  # Right of fname.
+        local re_pre="^function[[:space:]]+"                # Left of fname.
+        local re_fn="[a-zA-Z0-9_:]+"                        # fname.
+        local re_post="[[:space:]]*\(\)[[:space:]]+\{.*$"   # Right of fname.
         # Get an array of function names from the given file.
         local -a fnames=( ${(f)"$( grep -E "${re_pre}${re_fn}${re_post}" "${file}" | sed -E "s/${re_pre}// ; s/${re_post}//" )"} )
         echo "${fnames}"
@@ -85,7 +89,7 @@ function () {
     # Args:     <source>    A source string.
     #           <fname>     A list of function names.
     # Outputs:  None
-    # Returns:  Default exit status.
+    # Status:   Default status.
     # Details:
     #   - Appends <source> to the list of sources of each function name in the
     #     fnmap registry. If no function name index is found, one is added.
@@ -105,8 +109,8 @@ function () {
     # Syntax:   _fnmap_validate_fnames
     # Args:     None.
     # Outputs:  An error message for every duplicate in the function name registry.
-    # Returns:  0 on success (no duplicates found).
-    #           1 on error (duplicates found).
+    # Status:   returns 0 (success) if no duplicates found.
+    #           returns 1 (error) if duplicates found.
     # -----------------------------------------------------------------------------
     function _fnmap_validate_fnames() {
         local duplicates=false
@@ -133,7 +137,7 @@ function () {
     # Args:     None.
     # Outputs:  Pretty-prints the function name registry to stdout, in JSON format:
     #           { "fnmap": { "<fname>": { "count": int, "sources": str } } }
-    # Returns:  Default exit status.
+    # Status:   Default status.
     # -----------------------------------------------------------------------------
     function _fnmap_print() {
         echo "{"

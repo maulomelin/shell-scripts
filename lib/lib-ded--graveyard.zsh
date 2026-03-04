@@ -6,12 +6,57 @@
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# Status:   DEPRECATED. Functionality integrated into LOG::_box().
-# Syntax:   ded_get_display_width [<string> ...]
+# Status:   DEPRECATED. See "Caution" below. Logic not straight-forward, it may
+#           lead to bugs/maintenance issues, and it only saves 1 line of code.
+# Syntax:   sys::fail [<message> ...]
+# Args:     <message>   Error message strings.
+# Outputs:  Log message with log level WARNING.
+# Status:   return 1 (error).
+# Caution:  The `return 1` statement exits the `sys::fail()` function itself.
+#           The caller *must* check the return status and handle the failure
+#           appropriately. When used in a short-circuit expression, the caller
+#           can choose to return from the current function, or to continue with
+#           additional logic. In a short-circuit expression, use short-circuit
+#           chaining to control the flow, such as:
+#               `{command} || sys::fail "{command} failed." || return`
+# Details:
+#   - Ends the operation and returns to caller with status 1 (error).
+#   - Logs the <message> strings as a WARNING message.
+#     If no message is provided, a default message is used.
+# Notes:
+#   - Useful in short-circuit expressions, such as:
+#       `{command} || sys::fail "{command} failed."` || return
+# -----------------------------------------------------------------------------
+function ded::sys::fail() {
+    local msg=${_SYS[DEFAULT_FAIL_MESSAGE]:-}
+    log::warning "${@:-${msg}} ==> Returning to caller."
+    return 1
+}
+
+# -----------------------------------------------------------------------------
+# Status:   DEPRECATED. Deprecated when sys::fail() was deprecated.
+# Syntax:   sys::return [<message> ...]
+# Args:     <message>   Message strings.
+# Outputs:  Log message with log level INFO.
+# Status:   return 0 (success).
+# Details:
+#   - Ends the operation and returns to caller with status 0 (success).
+#   - Logs the <message> strings as an INFO message.
+#     If no message is provided, a default message is used.
+# -----------------------------------------------------------------------------
+function ded::sys::return() {
+    local msg=${_SYS[DEFAULT_RETURN_MESSAGE]:-}
+    log::info "${@:-${msg}} ==> Returning to caller."
+    return 0
+}
+
+# -----------------------------------------------------------------------------
+# Status:   DEPRECATED. Functionality integrated into log::_box().
+# Syntax:   log::get_display_width [<string> ...]
 # Args:     <string>    A list of strings.
 # Outputs:  The length of the longest printed line from all <string>s.
 #           0, if no strings are given, or if the longest string is empty.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - Given any number of strings, this utility calculates the length of the
 #     longest line as printed on the screen by removing any SGR codes.
@@ -43,7 +88,7 @@
 #       local display_width=${#${(@O)clines//?/x}[1]:-}
 #     But this is not as easy to follow and harder to maintain.
 # -----------------------------------------------------------------------------
-function ded_get_display_width() {
+function ded::log::get_display_width() {
     __debug_start "Calculate the display width of all input strings."
 
     local multiline=$(_to_multiline ${@})   # Make a multi-line from the args.
@@ -68,13 +113,13 @@ function ded_get_display_width() {
 
 # -----------------------------------------------------------------------------
 # Status:   DEPRECATED. Inefficient design. Originally in LOG::.
-# Syntax:   ded_is_item_in_list <item> <li> [<li> ...]
+# Syntax:   log::_is_item_in_list <item> <li> [<li> ...]
 # Args:     <item>  Item to check.
 #           <li>    List item to scan. One required.
 # Outputs:  None.
-# Returns:  0 on success (item found in the list).
-#           1 on failure (item not found in the list).
-#           2 on error (wrong number of arguments, < 2).
+# Status:   return 0 (success) if item found in the list.
+#           return 1 (failure) if item not found in the list.
+#           return 2 (error) if wrong number of arguments (< 2).
 # Details:
 #   - Checks if <item> is in the list by comparing <item> against every <li>.
 #   - It needs at least 1 list item for a valid scan.
@@ -84,7 +129,7 @@ function ded_get_display_width() {
 # Sources:
 #   https://stackoverflow.com/questions/2875424/correct-way-to-check-for-a-command-line-flag-in-bash
 # -----------------------------------------------------------------------------
-function ded_is_item_in_list() {
+function ded::log::_is_item_in_list() {
     # Check for the required number of arguments.
     if (( ${#} < 2 )); then
         return 2  # Error: wrong number of arguments (< 2).
@@ -105,17 +150,17 @@ function ded_is_item_in_list() {
 # -----------------------------------------------------------------------------
 # Status:   DEPRECATED. DO NOT USE. BAD DESIGN. Originally in LOG::.
 #           Message is scavenged if <suffix> is missing.
-# Syntax:   _wrap [<prefix>] [<string>*] [<suffix>]
+# Syntax:   log::_wrap [<prefix>] [<string>*] [<suffix>]
 # Args:     <prefix>    A prefix string.
 #           <string>    A list of strings.
 #           <suffix>    A suffix string.
 # Outputs:  A multiline string.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - Appends a <prefix> and a <suffix> string to every line in a log message.
 #   - The log message is created from all input <string>s.
 # -----------------------------------------------------------------------------
-function ded_wrap() {
+function ded::log::_wrap() {
     __debug_start "Append prefix and suffix labels around a message."
 
     # Extract the prefix and suffix strings.

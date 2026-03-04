@@ -7,52 +7,50 @@
 # TODO: Do we write a module init routine to validate all registry variables,
 #       such as verbosity? Do we need to ensure default/init values are valid
 #       or trust the module author? Is the latter enough for personal scripts?
+# TODO: Review using ${REG[{key}]} directly vs. via ${_LOG[{key}]} indirectly.
 # -----------------------------------------------------------------------------
 
 # Initialize private registry.
 typeset -gA _LOG=(
     [TAB]="  "
     [INDENTATION]="+ " # · . +-
-    [DATETIME_FORMAT]="+%Y-%m-%dT%H:%M:%S"
-    [VERBOSITY_REGEX]="^[01234]$"
-    [DEFAULT_VERBOSITY]=3
-    [LOG_LEVEL_REGEX]="^[01234]$"
-    [DEFAULT_LOG_LEVEL]=3
+    [MULTILINE_MERGE_AND_SPLIT]=true  # (true|false) (Default: true)
+    [MODULE_DEBUG]=false  # (true|false) (Default: false)
+    [DATETIME_FORMAT]=${REG[FORMAT_DATETIME_ISO8601]}
+    # TODO: Decide if these move to the global registry, REG[<key>].
     [LOG_LEVEL_ALERT]=0
     [LOG_LEVEL_ERROR]=1
     [LOG_LEVEL_WARNING]=2
     [LOG_LEVEL_INFO]=3
     [LOG_LEVEL_DEBUG]=4
-    [MULTILINE_MERGE_AND_SPLIT]=true  # (true|false) (Default: true)
-    [MODULE_DEBUG]=false  # (true|false) (Default: false)
 )
 
 # Initialize public registry.
 typeset -gA LOG=(
-    [verbosity]=${_LOG[DEFAULT_VERBOSITY]}
+    [verbosity]=${REG[DEFAULT_VERBOSITY]}
 )
 
 # -----------------------------------------------------------------------------
-# Syntax:   log_get_verbosity
+# Syntax:   log::get_verbosity
 # Args:     None.
 # Outputs:  Current verbosity level from the public registry.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Notes:
-#   - Creating a single getter/setter log_verbosity() function is difficult.
-#     It needs to set a global flag and generate a return value. Using command
-#     substitution to capture the return value, `x=$(log_verbosity X)`, runs
-#     the function in a subshell, which makes changing global flags not persist
-#     in the parent shell. Thus, we kept separate get and set functions.
+#   - Once tried to create a single getter/setter log::verbosity() function to
+#     use as `x=$(log::verbosity <level>)`. It needed to set a public registry
+#     variable and generate a return value. Command substitution captures the
+#     value but runs the function in a subshell so no changes persist. No easy
+#     work-arounds. Thus, we kept separate get/set functions.
 # -----------------------------------------------------------------------------
-function log_get_verbosity() {
+function log::get_verbosity() {
     echo "${LOG[verbosity]}"
 }
 
 # -----------------------------------------------------------------------------
-# Syntax:   log_set_verbosity <level>
+# Syntax:   log::set_verbosity <level>
 # Args:     <level>     Verbosity level.
 # Outputs:  None.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Caution:  This function modifies the public registry. Do not call it inside a
 #           subshell, including: in a pipe `... | ...`, in parentheses `(...)`,
 #           or in command substitution `$(...)`, as these create subshells and
@@ -61,9 +59,9 @@ function log_get_verbosity() {
 #   - Validates <level>. If valid, the verbosity level in the public registry
 #     is set to <level>. If invalid, the verbosity level is not changed.
 # -----------------------------------------------------------------------------
-function log_set_verbosity() {
+function log::set_verbosity() {
     local verbosity=${1:-}
-    if [[ ${verbosity} =~ ${_LOG[VERBOSITY_REGEX]} ]]; then
+    if [[ ${verbosity} =~ ${REG[REGEX_VERBOSITY]} ]]; then
         __debug_info "Setting verbosity level to [${verbosity}]."
         LOG[verbosity]=${verbosity}
     else
@@ -72,12 +70,12 @@ function log_set_verbosity() {
 }
 
 # -----------------------------------------------------------------------------
-# Syntax:   log_(alert|error|warning|info|debug)[_<modifier>] [<string> ...]
+# Syntax:   log::(alert|error|warning|info|debug)[_<modifier>] [<string> ...]
 # Args:     <string>    A list of strings to be joined, formatted, and
 #                       displayed by the logging function used.
 # Outputs:  Formatted text to stderr, if the log level is <= current verbosity.
 #           Otherwise, no output is produced.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - There are five logging levels:
 #       +-----------+----------------------------+
@@ -89,13 +87,13 @@ function log_set_verbosity() {
 #       | 3/Info    | General info, status.      |
 #       | 4/Debug   | Debug info.                |
 #       +-----------+----------------------------+
-#   - Each logging function, log_*(), defines its logging level and a pipeline
+#   - Each logging function, log::*(), defines its logging level and a pipeline
 #     of formatting functions to format a log message before printing.
 #       - Core logging functions are named after the log levels:
-#           log_alert(), log_error(), log_warning(), log_info(), log_debug()
+#         log::alert(), log::error(), log::warning(), log::info(), log::debug()
 #       - Modifier logging functions simply define different formatting
 #         at their respective log level:
-#           log_info_header(), log_info_start(), etc.
+#         log::info_header(), log::info_start(), etc.
 #   - The verbosity level sets the display threshold for logging levels.
 #     A log message is displayed only if its log level <= verbosity level:
 #       +------------------+---------------------+
@@ -111,15 +109,15 @@ function log_set_verbosity() {
 #   - Formatting functions format a log message by adding string prefixes
 #     and/or changing its display attributes via embedded SGR codes.
 # -----------------------------------------------------------------------------
-function log_alert()       { _print ${_LOG[LOG_LEVEL_ALERT]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "blink"         "$(_prefix "[ALERT] " "$(_indent "${@}")")")")" }
-function log_error()       { _print ${_LOG[LOG_LEVEL_ERROR]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_red"    "$(_prefix "[ERROR] " "$(_indent "${@}")")")")" }
-function log_warning()     { _print ${_LOG[LOG_LEVEL_WARNING]} "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_orange" "$(_prefix "[WARN]  " "$(_indent "${@}")")")")" }
-function log_info()        { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
-function log_info_header() { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_box "${@}")")")")")" }
-function log_info_start()  { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "START: " "${@}")")")")")" }
-function log_info_end()    { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "END: "   "${@}")")")")")" }
-function log_info_xxx()    { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "cyan"          "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
-function log_debug()       { _print ${_LOG[LOG_LEVEL_DEBUG]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_blue"   "$(_prefix "[DEBUG] " "$(_indent "${@}")")")")" }
+function log::alert()       { _print ${_LOG[LOG_LEVEL_ALERT]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "blink"         "$(_prefix "[ALERT] " "$(_indent "${@}")")")")" }
+function log::error()       { _print ${_LOG[LOG_LEVEL_ERROR]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_red"    "$(_prefix "[ERROR] " "$(_indent "${@}")")")")" }
+function log::warning()     { _print ${_LOG[LOG_LEVEL_WARNING]} "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_orange" "$(_prefix "[WARN]  " "$(_indent "${@}")")")")" }
+function log::info()        { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
+function log::info_header() { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_box "${@}")")")")")" }
+function log::info_start()  { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "START: " "${@}")")")")")" }
+function log::info_end()    { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "END: "   "${@}")")")")")" }
+function log::info_xxx()    { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "cyan"          "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
+function log::debug()       { _print ${_LOG[LOG_LEVEL_DEBUG]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_blue"   "$(_prefix "[DEBUG] " "$(_indent "${@}")")")")" }
 
 # -----------------------------------------------------------------------------
 # Syntax:   _print <level> [<string> ...]
@@ -127,7 +125,7 @@ function log_debug()       { _print ${_LOG[LOG_LEVEL_DEBUG]}   "$(_prefix "$(_fo
 #           <string>    A list of strings.
 # Outputs:  Sends all strings to stderr if <level> is <= current verbosity.
 #           Otherwise, no output is produced.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - If <level> is not an integer, the default verbosity level is used.
 # -----------------------------------------------------------------------------
@@ -137,9 +135,9 @@ function _print() {
 
     # Validate the log level and set to default if invalid.
     local level=${1:-}
-    if [[ ! ${level} =~ ${_LOG[LOG_LEVEL_REGEX]} ]]; then
-        log_alert "Invalid log level [${level}]. Setting it to default [${_LOG[DEFAULT_LOG_LEVEL]}]."
-        level=${_LOG[DEFAULT_LOG_LEVEL]}
+    if [[ ! ${level} =~ ${REG[REGEX_LOG_LEVEL]} ]]; then
+        __debug_info "Invalid log level [${level}]. Setting it to default [${REG[DEFAULT_LOG_LEVEL]}]."
+        level=${REG[DEFAULT_LOG_LEVEL]}
     fi
 
     # Print the message if its log level is <= the current verbosity level.
@@ -154,7 +152,7 @@ function _print() {
 # Args:     <format>    Whitespace-delimited format codes.
 #           <string>    A list of strings.
 # Outputs:  A multiline string where each line is one <format>ed <string>.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - A format code represents embedded SGR code prefixes & suffixes.
 #   - Formatting prefixes & suffixes are applied to every <string>.
@@ -241,7 +239,7 @@ function _format() {
 # Args:     <prefix>    A sprefix string.
 #           <string>    A list of strings.
 # Outputs:  A multiline string where each line is <prefix> + <string>.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - The <prefix> string is prepended to every <string>.
 #   - All prefixed strings are joined into a single multiline string.
@@ -282,7 +280,7 @@ function _prefix() {
 # Syntax:   _timestamp [<string> ...]
 # Args:     <string>    A list of strings.
 # Outputs:  A multiline string where each line is {datetime}stamp + <string>.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - A datetime string is prepended to every <string>.
 #   - All timestamped strings are joined into a single multiline string.
@@ -293,6 +291,7 @@ function _timestamp() {
     # Set up local variables from module registry for easier access.
     local -r tab=${_LOG[TAB]}
     local -r datetime_format=${_LOG[DATETIME_FORMAT]}
+    local datetime_stamp
 
     # Normalize inputs into a single multiline string.
     __debug_info "Normalize inputs into a single multiline string..."
@@ -303,7 +302,8 @@ function _timestamp() {
     local lines=(${(f)multiline})           # Create an array of lines.
     local i line out=""                     # Datetime-stamp each line.
     for i in {1..${#lines:-1}}; do          # ":-1" to force at least one pass.
-        line="[$(date ${datetime_format})]${lines[i]:-}"
+        datetime_stamp="[${(%):-"%D{${datetime_format}}"}]"
+        line="${datetime_stamp}${lines[i]:-}"
         out+=${line}"\n"
         __debug_info "${tab}[${line}]"
     done
@@ -320,7 +320,7 @@ function _timestamp() {
 # Outputs:  A multiline string where each line is a <string> and additional
 #           lines, prefixes, and suffixes that box all lines with ASCII chars.
 #           If no strings are given, an empty box is rendered.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - To draw a box around various lines of text:
 #       1. Find the longest <string> and calculate the width of the box.
@@ -387,7 +387,7 @@ function _box() {
 # Outputs:  A multiline string where each line is {indent}+{caller}+<string>.
 #           {indent} is based on the calling function's call depth.
 #           {caller} is the name of the function making this request.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - The {indent} string is configurable in the module's registry.
 #   - Total indentation equals one {indent} for every nested function call.
@@ -444,7 +444,7 @@ function _indent() {
 # Syntax:   _to_multiline [<string> ...]
 # Args:     <string>    A list of strings.
 # Outputs:  A multiline string where each line is one <string>.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - A multiline is an $'\n'-delimited string created from all <string>s.
 #     It is a single string whose "escape sequences" (e.g., "\n") have been
@@ -550,7 +550,7 @@ function _to_multiline() {
 #           __print [<string> ...]
 # Args:     <string>    A list of strings.
 # Outputs:  Prints simple log-formatted messages to stderr.
-# Returns:  Default exit status.
+# Status:   Default status.
 # Details:
 #   - A very simple, internal logger used to debug the logging module itself.
 #   - It can be toggled via a registry flag: _LOG[MODULE_DEBUG]=(true|false).
@@ -592,8 +592,9 @@ function __print() {
 
     # Set up local variables from module registry for easier access.
     local -r indentation=${_LOG[INDENTATION]}
-    local -r datetime_format=${_LOG[DATETIME_FORMAT]}
     local -r module_debug=${_LOG[MODULE_DEBUG]}
+    local -r datetime_format=${_LOG[DATETIME_FORMAT]}
+    local datetime_stamp
 
     if [[ ${module_debug:-false} == true ]]; then
         local message="${@}"                # Get the log message.
@@ -608,7 +609,8 @@ function __print() {
         for (( i = lvl + 1; i <= ${#funcstack[@]}; i++ )); do
             indent+=${indentation}
         done
-        message="[$(date ${datetime_format})] [DEBUG] ${indent}${caller}${message}"
+        datetime_stamp="[${(%):-"%D{${datetime_format}}"}]"
+        message="${datetime_stamp} [DEBUG] ${indent}${caller}${message}"
         echo "${message}" >&2               # Print the message to stderr.
     fi
 }

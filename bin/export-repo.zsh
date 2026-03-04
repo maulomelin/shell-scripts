@@ -11,19 +11,18 @@ source "$(dirname "${0}")/../lib/init.zsh" || {
     exit 1
 }
 
-# Prevent execution if the script is being sourced.
+# Prevent script sourcing.
 if [[ ${ZSH_EVAL_CONTEXT} == *:file* ]]; then
-    echo "\e[91mError: The script [${(%):-%x}] must be executed, not sourced.\e[0m"
-    return 1    # Abort sourcing and return to the caller with error.
+    log::warning "The script [${(%):-%x}] must be executed, not sourced."
+    return 1
 fi
 
 # Initialize private registry.
 typeset -gA _APP=(
-    [BATCH_REGEX]="^(true|false)$"
-    [DEFAULT_BATCH]=false
-    [AFFIRMATIVE_REGEX]="^[yY]([eE][sS])?$"
-    [DATETIME]="${(%):-"%D{%Y%m%dT%H%M%S}"}" # "The Z Shell Manual" v5.9, § 13.2.4, pg. 42.
-    [DEFAULT_VERBOSITY]=3
+    [DEFAULT_VERBOSITY]=${REG[DEFAULT_VERBOSITY]}
+    [DEFAULT_BATCH]=${REG[FALSE]}
+    [DEFAULT_HELP]=${REG[FALSE]}
+    [DATETIME]="${(%):-"%D{${REG[FORMAT_DATETIME_SLUG]}}"}"
     [DEFAULT_REPO]="https://github.com/pages-themes/primer"
     [DEFAULT_DIR]="${PWD}"
 )
@@ -67,7 +66,7 @@ Options:
 
     -v=<level>, --verbosity=<level>
         Sets the display threshold for logging level.
-        Defaults to [${_APP[DEFAULT_VERBOSITY]}] if not present or invalid.
+        Defaults to [${REG[DEFAULT_VERBOSITY]}] if not present or invalid.
 
             Log Message    |   Verbosity Level
               Display      |  0   1   2   3   4
@@ -80,7 +79,6 @@ Options:
 
     -b, --batch
         Force non-interactive mode to perform actions without confirmation.
-        Defaults to [${_APP[DEFAULT_BATCH]}] if not present.
 
     -h, --help
         Display this help message and exit.
@@ -92,9 +90,9 @@ EOF
 function run() {
 
     # Map function arguments to local variables.
-    local repo="${1}"
-    local dir="${2}"
-    local batch="${3}"
+    local batch="${1}"
+    local repo="${2}"
+    local dir="${3}"
 
     # Generate a unique directory name based on the repo name by slugifying
     # and timestamping it. Since this is geared towards GitHub-hosted repos,
@@ -108,37 +106,38 @@ function run() {
     local export_dir="${s}"
 
     # Display script settings.
-    log_info "Script settings:"
-    log_info "  Source repo: [${repo}]"
-    log_info "  Target dir:  [${dir}]"
-    log_info "  Export dir:  [${export_dir}]"
+    log::info "Script settings:"
+    log::info "  Source repo:  [${repo}]"
+    log::info "  Target dir:   [${dir}]"
+    log::info "  Export dir:   [${export_dir}]"
 
     # Create the target folder.
-    log_info "Create the target folder..."
-    mkdir -p "${dir}" || err_abort "Cannot create the target directory ${dir}."
+    log::info "Create the target folder..."
+    mkdir -p "${dir}" || sys::abort "Cannot create the target directory ${dir}."
 
     # Change to the target directory.
-    log_info "Change to the target directory [${dir}]..."
-    pushd "${dir}" || err_abort "Cannot change to directory ${dir}."
+    log::info "Change to the target directory [${dir}]..."
+    pushd "${dir}" || sys::abort "Cannot change to directory ${dir}."
 
     # Clone the repo to the target directory and remove the .git directory.
-    log_info "Clone the source repository to the export directory [${export_dir}]..."
-    git clone --depth=1 "${repo}" "${export_dir}" || err_abort "Cannot clone repository ${repo} to ${export_dir}."
-    log_info "Remove all Git metadata..."
-    rm -rf ./"${export_dir}"/.git || err_abort "Cannot remove .git directory from ${export_dir}."
+    log::info "Clone the source repository to the export directory [${export_dir}]..."
+    git clone --depth=1 "${repo}" "${export_dir}" || sys::abort "Cannot clone repository ${repo} to ${export_dir}."
+    log::info "Remove all Git metadata..."
+    rm -rf ./"${export_dir}"/.git || sys::abort "Cannot remove .git directory from ${export_dir}."
 
     # Go back to the original directory.
-    log_info "Return to the original directory..."
-    popd || err_abort "Cannot return to the original directory."
+    log::info "Return to the original directory..."
+    popd || sys::abort "Cannot return to the original directory."
 
-    log_info "==> Done."
+    log::info "==> Done."
 }
 
 # Parse and validate CLI arguments. This is the script's entry point.
 function main() {
 
     # Parse all CLI arguments.
-    local help batch verbosity dir repo
+    local dir repo
+    local help batch verbosity
     local args=( "${@}" ) args_used=() args_ignored=()
     while (( $# )); do
         case "$1" in
@@ -152,68 +151,58 @@ function main() {
         shift
     done
 
-    # Display usage information if requested.
-    if [[ "${help}" == true ]]; then usage; fi
+    # Set verbosity level.
+    log::set_verbosity "${_APP[DEFAULT_VERBOSITY]}" # Set level to app default.
+    log::set_verbosity "${verbosity}"               # Try to set to user input.
+    verbosity=$(log::get_verbosity)                 # Get actual level.
 
-    # Validate and set the verbosity mode.
-    log_set_verbosity "${_APP[DEFAULT_VERBOSITY]}"  # Set to app default.
-    log_set_verbosity "${verbosity}"                # Change if valid.
-    verbosity=$(log_get_verbosity)
+    # Handle help requests before validating other inputs.
+    help=$(dat::validate_bool "help flag" "${help}" "${_APP[DEFAULT_HELP]}") || return 1
+    if dat::is_true "${help}"; then usage; fi
 
-    # Validate batch mode and set to default if invalid.
-    if [[ -z ${batch} ]]; then
-        batch=${_APP[DEFAULT_BATCH]}
-    else
-        if [[ ! ${batch} =~ ${_APP[BATCH_REGEX]} ]]; then
-            log_warning "Invalid batch flag [${batch}]. Setting to default [${_APP[DEFAULT_BATCH]}]."
-            batch=${_APP[DEFAULT_BATCH]}
-        fi
-    fi
-
-    # Validate the target directory and set to default if invalid.
-    dir=${dir/#"~"/${HOME}} # Expand leading "^~" to the home directory.
-    dir=${dir:A}            # Absolute path via history expansion modifier.
-    dir="${dir:-${_DEFAULT_DIR}}"
-
-    # Validate the source repository by setting to default if missing.
-    repo="${repo:-${_APP[DEFAULT_REPO]}}"
+    # Validate all other inputs.
+    batch=$(dat::validate_bool "batch flag" "${batch}" "${_APP[DEFAULT_BATCH]}") || return 1
+    dir=$(dat::validate_path "target dir" "${dir}" "${_APP[DEFAULT_DIR]}") || return 1
+    repo=$(dat::validate_url "repo url" "${repo}" "${_APP[DEFAULT_REPO]}") || return 1
+#    repo="${repo:-${_APP[DEFAULT_REPO]}}"   # TODO: Move to validate_url() once implemented.
 
     # Display processed arguments.
-    log_info_header "Repository Exporter"
-    log_info "Default settings:"
-    log_info "  Source repo: [${_APP[DEFAULT_REPO]}]"
-    log_info "  Target dir:  [${_APP[DEFAULT_DIR]}]"
-    log_info "  Batch mode:  [${_APP[DEFAULT_BATCH]}]"
-    log_info "  Verbosity:   [${_APP[DEFAULT_VERBOSITY]}]"
-    log_info "Arguments processed:"
-    log_info "  Input:       [${args}]"
-    log_info "  Used:        [${args_used}]"
-    log_info "  Ignored:     [${args_ignored}]"
-    log_info "Effective settings:"
-    log_info "  Source repo: [${repo}]"
-    log_info "  Target dir:  [${dir}]"
-    log_info "  Batch mode:  [${batch}]"
-    log_info "  Verbosity:   [${verbosity}]"
+    log::info_header "Repository Exporter"
+    log::info "Arguments processed:"
+    log::info "  Input:        [${args}]"
+    log::info "  Used:         [${args_used}]"
+    log::info "  Ignored:      [${args_ignored}]"
+    log::info "Default settings:"
+    log::info "  Source repo:  [${_APP[DEFAULT_REPO]}]"
+    log::info "  Target dir:   [${_APP[DEFAULT_DIR]}]"
+    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::info "Effective settings:"
+    log::info "  Source repo:  [${repo}]"
+    log::info "  Target dir:   [${dir}]"
+    log::info "  Verbosity:    [${verbosity}]"
+    log::info "  Batch:        [${batch}]"
+    log::info "  Help:         [${help}]"
 
     # Prompt user for confirmation, unless in batch mode.
-    if [[ "${batch}" == true ]]; then
-        log_warning "Batch mode enabled. Proceeding with script."
+    if dat::is_true "${batch}"; then
+        log::warning "Batch mode enabled. Proceeding with script."
     else
         read "response?Proceed? (y/N): "
-        if [[ ! ${response} =~ ${_APP[AFFIRMATIVE_REGEX]} ]]; then
-            log_info "Exiting script."
-            exit 0
+        if ! dat::is_yes "${response}"; then
+            sys::terminate "User declined to proceed."
         fi
     fi
 
-    # Check that all variables passed to run() exist.
-    if [[ -z "${repo}" || -z "${dir}" || -z "${batch}" ]]; then
-        log_error "Invalid internal state. Check default settings."
-        exit 1
+    # Check that all variables are populated before executing core logic.
+    local -a args=( "${batch}" "${repo}" "${dir}" )
+    if [[ "${#args}" != "${#args:#}" ]]; then
+        sys::abort "Invalid state: Empty args."
     fi
 
-    # Execute the core logic.
-    run "${repo}" "${dir}" "${batch}"
+    # Execute core logic.
+    run "${args[@]}"
 }
 
 # Invoke main() with all CLI arguments.
