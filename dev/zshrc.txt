@@ -1,11 +1,20 @@
-fizzbuzz
-foo
-bar
-some text
-foobar
-more text
-source /usr/local here
-# Use chruby by default.
+# This file is sourced by zsh when it starts up.
+# It sets up the environment for the user.
+
+# Allow comments in interactive shells.
+setopt INTERACTIVE_COMMENTS
+
+# Configure zsh shell to use chruby by default.
 source /usr/local/opt/chruby/share/chruby/chruby.sh
 source /usr/local/opt/chruby/share/chruby/auto.sh
 chruby ruby-3.4.1
+
+# Set preferred prompt style.
+# PROMPT="%n@%m %1~ %# "  # Original prompt style.
+# https://zsh.sourceforge.io/Guide/zshguide02.html#l19
+#PROMPT="%F{yellow}[%?][%~] %# %f"
+PROMPT="%B%F{226}[%?][%~] %# %f%b"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Prepend personal scripts to PATH, to prioritize over system defaults.
+export PATH="/Users/maulomelin/_local/bin:${PATH}"

@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: n/a (Initialization Script)
+# SPDX-FileComment:         Namespace: n/a (Framework Initialization Script)
 # -----------------------------------------------------------------------------
 
 # Fail fast if not running under zsh.
@@ -39,13 +39,13 @@ setopt NO_CASE_MATCH   # Enable case-insensitive pattern matching.
 setopt EXTENDED_GLOB   # Enable extended globbing features.
 #setopt XTRACE         # DEBUG: Trace command execution and expansion.
 
-# Source common libraries.
-#   - Source libraries only if no function name collisions are found.
+# Source common framework libraries.
+#   - Source framework libraries only if no function name collisions are found.
 #   - Run checks inside an anonymous function to keep the global scope clean.
 function () {
 
-    # Common libraries.
-    local lib_dirpath="${${(%):-%x}:A:h}"
+    # Common framework libraries.
+    local lib_dirpath="${${(%):-%x}:A:h}/framework"
     local -a libs=(
         "lib-reg--global-registry.zsh"
         "lib-log--logging.zsh"
@@ -54,6 +54,7 @@ function () {
         "lib-env--environment.zsh"
         "lib-err--error-handling.zsh"
         "lib-ded--graveyard.zsh"
+        "lib-cfg--config-mgmt.zsh"
         # TODO: Add new libraries here.
     )
 

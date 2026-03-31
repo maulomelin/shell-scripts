@@ -8,6 +8,17 @@
 #       such as verbosity? Do we need to ensure default/init values are valid
 #       or trust the module author? Is the latter enough for personal scripts?
 # TODO: Review using ${REG[{key}]} directly vs. via ${_LOG[{key}]} indirectly.
+# TODO: Add more box styles. Implement it with a box style dispatcher:
+#         1. Rename _box() to _box_draw().
+#         2. Update _box_draw() to:
+#              a. Take a string with the box characters.
+#              b. Parse the individual box characters from the input string.
+#              c. Maintains a default box style if no input string is provided.
+#         3. Define box styles as arrays of characters in the module registry.
+#         4. Add a _box() function that takes a style argument, validates it,
+#            and calls _box_draw() with the appropriate box characters.
+#         5. Add a public log::info_*() function for each style
+#            (e.g., log::info_title, log::info_section, log::info_box, etc.).
 # -----------------------------------------------------------------------------
 
 # Initialize private registry.
@@ -315,7 +326,46 @@ function _timestamp() {
 }
 
 # -----------------------------------------------------------------------------
-# Syntax:   _box [<string> ...]
+# Syntax:   _box_draw [<string> ...]
+# Args:     <string>    A list of strings.
+# Outputs:  A multiline string where each line is a <string> and additional
+#           lines, prefixes, and suffixes that box all lines with ASCII chars.
+#           If no strings are given, an empty box is rendered.
+# Status:   Default status.
+# Details:
+#   - To draw a box around various lines of text:
+# -----------------------------------------------------------------------------
+function _box() {
+    __debug_start "Box drawer dispatcher."
+
+    _box_draw "${@}"
+
+# TODO: Implement box style dispatcher:
+#    # Extract the box style from the first argument. If it matches a known
+#    # style, use it. Otherwise, treat all arguments as the message to box.
+#    local style=${1:-}
+#    if [[ ${style} =~ ${REG[REGEX_BOX_STYLE]} ]]; then
+#        __debug_info "Box style [${style}] recognized. Using it to draw the box..."
+#        if (( $# >= 1 )); then shift; fi    # Shift to string args, if any.
+#    else
+#        __debug_info "Box style [${style}] not recognized. Using default box style..."
+#
+#    local box=( "+-+" "|  |" "+-+" )
+#    # Define box-drawing characters.
+#          #corner-top-left      #border-top       #corner-top-right
+#    local BOX_CTL="+"           BOX_BT="-"        BOX_CTR="+"
+#          #border-left   #pad-left   #pad-right   #border-right
+#    local BOX_BL="|"     BOX_PL=" "  BOX_PR=" "   BOX_BR="|"
+#          #corner-bottom-left   #border_bottom    #corner-bottom-right
+#    local BOX_CBL="+"           BOX_BB="-"        BOX_CBR="+"
+#
+#    _box_draw "${@}"
+#    fi
+# :TODO
+}
+
+# -----------------------------------------------------------------------------
+# Syntax:   _box_draw [<string> ...]
 # Args:     <string>    A list of strings.
 # Outputs:  A multiline string where each line is a <string> and additional
 #           lines, prefixes, and suffixes that box all lines with ASCII chars.
@@ -331,7 +381,7 @@ function _timestamp() {
 #       4. Draw the bottom line.
 #   - All "boxed" strings are joined into a single multiline string.
 # -----------------------------------------------------------------------------
-function _box() {
+function _box_draw() {
     __debug_start "Draw a box around a message."
 
     # Set up local variables from module registry for easier access.

@@ -19,21 +19,31 @@ source "$(dirname "${0}")/../lib/init.zsh" || {
     exit 1
 }
 
-# TODO: Update doc. ==> HERE <==
+function () {
+    log::info_header "Welcome to the Lab of Experiments!"
 
+    local block_label="My config block (foobar)"
+    local config_block_array=(
+        "export xPATH=\"\${PATH}:/Applications/Visual Studio Code.app/Contents/Resources/app/bin\""
+        "export xFOO=\"foo\""
+    )
+    local config_block="${(F)config_block_array}"
+    cfg::update_manifest "./zshrc.txt" "${config_block}" "${block_label}"
+
+}
 
 function experiment_0032() {
     LOG_VERBOSITY=+0010
-    log_info_header "Something exciting!"
-    log_info_xxx "testing"
+    log::info_header "Something exciting!"
+    log::info_xxx "testing"
 #    display_sgr_codes
-    sys_abort
+    sys::abort
 }
 experiment_0032 "${@}"
 
 
 function experiment_0031() {
-#    log_info_header "Test updates to log formatting function."
+#    log::info_header "Test updates to log formatting function."
     #zsh shell_scripts/scratchpad.zsh foo bar "this isn\nnnewline" "lasv\vvr\rrtn\nnx" "some t\tt done" "*"
     local format
 
@@ -51,22 +61,22 @@ function experiment_0031() {
 #    format="red bold"
 #    format="bold"
 #    format=""
-    log_info_header "echo \"\$(_format \"${format}\" \${@})\""
-    log_info_header "${@}"
-    log_info_start "${@}"
-    log_info_end "${@}"
-    log_info "${@}"
-    log_warning "${@}"
-    log_error "${@}"
-    log_debug "${@}"
-    log_info_xxx "${@}"
+    log::info_header "echo \"\$(_format \"${format}\" \${@})\""
+    log::info_header "${@}"
+    log::info_start "${@}"
+    log::info_end "${@}"
+    log::info "${@}"
+    log::warning "${@}"
+    log::error "${@}"
+    log::debug "${@}"
+    log::info_xxx "${@}"
 
     #display_sgr_codes ; exit
 
     echo "$(_format "${format}" ${@})"
 
-    #log_info_header "x=\$(_format \${@})"; x=$(_format ${@}); echo ${x}
-    #log_info_header "x=\$(_format)"; x=$(_format); echo ${x}
+    #log::info_header "x=\$(_format \${@})"; x=$(_format ${@}); echo ${x}
+    #log::info_header "x=\$(_format)"; x=$(_format); echo ${x}
 
 #    abort
 }
@@ -74,7 +84,7 @@ experiment_0031 "${@}"
 
 
 function experiment_0030() {
-    log_info_header "Different types of for loops."
+    log::info_header "Different types of for loops."
 
     for i in {1..0}; do
         echo "a[${i}]"
@@ -102,7 +112,7 @@ function experiment_0029() {
 #   local w=1 x="a" y=("x" "y" "z")
 #   local -A z=("a" 1 "b" 2 "c" 3)
 #   echo ${(t)w} ${(t)x} ${(t)y} ${(t)z}
-    log_info_header "Print out variables in JSON-like format."
+    log::info_header "Print out variables in JSON-like format."
     local w=1; echo "\tw=1\t\t\t\t==> [${(t)w}]"
     local x="a"; echo "\tx=\"a\"\t\t\t\t==> [${(t)x}]"
     local y=("x" "y" "z"); echo "\ty=(\"x\", \"y\", \"z\")\t\t==> [${(t)y}]"
@@ -112,53 +122,53 @@ function experiment_0029() {
 
 
 function experiment_0028() {
-    log_info_header "Replicate experiment_0027 using log_*() calls from the framework's logging module."
-    log_info_start
+    log::info_header "Replicate experiment_0027 using log::*() calls from the framework's logging module."
+    log::info_start
 #    local me=${funcstack[1]:-SHELL}
-#    log_info_header "me = \${funcstack[1]:-SHELL} = [${me}]"
+#    log::info_header "me = \${funcstack[1]:-SHELL} = [${me}]"
     local foo="bar"
 
     function print_funcstack() {
-        log_info_start "I am in print_funcstack() [${foo}]"
+        log::info_start "I am in print_funcstack() [${foo}]"
         local x
-        for x in ${funcstack[@]}; do log_debug "${x}"; done
+        for x in ${funcstack[@]}; do log::debug "${x}"; done
         print_rev_funcstack
     }
 
     function print_rev_funcstack() {
-        log_info_header "print_rev_funcstack()"
-        log_info_start "I am in print_rev_funcstack()"
+        log::info_header "print_rev_funcstack()"
+        log::info_start "I am in print_rev_funcstack()"
         local x i
 
-        log_info "I am in print_rev_funcstack() showing you funcstack[@]:"
-        for x in ${funcstack[@]}; do log_debug "\t[]: ${x}"; done
+        log::info "I am in print_rev_funcstack() showing you funcstack[@]:"
+        for x in ${funcstack[@]}; do log::debug "\t[]: ${x}"; done
 
-        log_info "I am in print_rev_funcstack() showing you funcstack[@] in a for{1..n} loop:"
-        for ((i = 1; i<=${#funcstack[@]}; i++)); do log_debug "\t[${i}]: ${funcstack[i]}"; done
+        log::info "I am in print_rev_funcstack() showing you funcstack[@] in a for{1..n} loop:"
+        for ((i = 1; i<=${#funcstack[@]}; i++)); do log::debug "\t[${i}]: ${funcstack[i]}"; done
 
-        log_info "I am in print_rev_funcstack() showing you funcstack[@] in a for{n..1} loop:"
-        for ((i = ${#funcstack[@]}; i >= 1; i--)); do log_debug "\t[${i}]: ${funcstack[i]}"; done
+        log::info "I am in print_rev_funcstack() showing you funcstack[@] in a for{n..1} loop:"
+        for ((i = ${#funcstack[@]}; i >= 1; i--)); do log::debug "\t[${i}]: ${funcstack[i]}"; done
 
-        log_info "I am in print_rev_funcstack() showing you funcstack[@] using (Oa) parameter expansion flags:"
-        for x in ${(Oa)funcstack[@]}; do log_debug "\t[]: ${x}"; done
+        log::info "I am in print_rev_funcstack() showing you funcstack[@] using (Oa) parameter expansion flags:"
+        for x in ${(Oa)funcstack[@]}; do log::debug "\t[]: ${x}"; done
     }
 
     function indirect() {
-        log_info_start "I am in indirect()"
+        log::info_start "I am in indirect()"
         print_funcstack
         print_rev_funcstack
-        log_info_end
+        log::info_end
     }
 
-    log_info "I am in experiment_0028()"
+    log::info "I am in experiment_0028()"
     indirect
-    log_info_end
+    log::info_end
 }
 #experiment_0028 "${@}"
 
 
 function experiment_0027() {
-#    log_info_header "Explore printing logs with indents using the call stack array funcstack[@]."
+#    log::info_header "Explore printing logs with indents using the call stack array funcstack[@]."
     local me=${funcstack[1]:-SHELL}
     echo "me=[${me}]"
 
@@ -213,7 +223,7 @@ function experiment_0027() {
 
 
 function experiment_0026() {
-    log_info_header "Explore splitting args newline escape sequences and escape character."
+    log::info_header "Explore splitting args newline escape sequences and escape character."
 
     function sgrattrib() { echo "\e[${@}m" }
     local fmt_bold="$(sgrattrib "1")"
@@ -226,37 +236,37 @@ function experiment_0026() {
     done
 
     local esc_seq_str="${message}"
-    for x in ${(f)esc_seq_str}; do log_debug "${0}(): 1_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "NO  ==> \${(f)string} does not recognize the escape sequence \_n."
-    for x in ${(s:\n:)esc_seq_str}; do log_debug "${0}(): 2_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "YES ==> \${(s:\_n:)string} recognizes the escape sequence \_n."
-    for x in ${(ps:\n:)esc_seq_str}; do log_debug "${0}(): 3_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "NO  ==> \${(ps:\_n:)string} does not recognize the escape sequence \_n."
-    for x in ${(ps:'\n':)esc_seq_str}; do log_debug "${0}(): 3a_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "NO  ==> \${(ps:'\_n':)string} does not recognize the escape sequence '\_n'."
-    for x in ${(ps:$'\n':)esc_seq_str}; do log_debug "${0}(): 4_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "NO  ==> \${(ps:\$'\_n':)string} does not recognize the escape sequence \_n."
+    for x in ${(f)esc_seq_str}; do log::debug "${0}(): 1_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "NO  ==> \${(f)string} does not recognize the escape sequence \_n."
+    for x in ${(s:\n:)esc_seq_str}; do log::debug "${0}(): 2_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "YES ==> \${(s:\_n:)string} recognizes the escape sequence \_n."
+    for x in ${(ps:\n:)esc_seq_str}; do log::debug "${0}(): 3_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "NO  ==> \${(ps:\_n:)string} does not recognize the escape sequence \_n."
+    for x in ${(ps:'\n':)esc_seq_str}; do log::debug "${0}(): 3a_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "NO  ==> \${(ps:'\_n':)string} does not recognize the escape sequence '\_n'."
+    for x in ${(ps:$'\n':)esc_seq_str}; do log::debug "${0}(): 4_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "NO  ==> \${(ps:\$'\_n':)string} does not recognize the escape sequence \_n."
 
     local esc_char_str=$(echo "${message}")
-    for x in ${(f)esc_char_str}; do log_debug "${0}(): 5_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "YES ==> \${(f)string} recognizes the escape character \$'\_n'."
-    for x in ${(s:\n:)esc_char_str}; do log_debug "${0}(): 6_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "NO  ==> \${(s:\_n:)string} does not recognize the escape character \$'\_n'."
-    for x in ${(ps:\n:)esc_char_str}; do log_debug "${0}(): 7_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "YES ==> \${(ps:\_n:)string} recognizes the escape character \$'\_n'."
-    for x in ${(ps:$'\n':)esc_char_str}; do log_debug "${0}(): 8_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
-    log_info "NO  ==> \${(ps:$'\_n':)string} does not recognize the escape character \$'\_n'."
+    for x in ${(f)esc_char_str}; do log::debug "${0}(): 5_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "YES ==> \${(f)string} recognizes the escape character \$'\_n'."
+    for x in ${(s:\n:)esc_char_str}; do log::debug "${0}(): 6_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "NO  ==> \${(s:\_n:)string} does not recognize the escape character \$'\_n'."
+    for x in ${(ps:\n:)esc_char_str}; do log::debug "${0}(): 7_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "YES ==> \${(ps:\_n:)string} recognizes the escape character \$'\_n'."
+    for x in ${(ps:$'\n':)esc_char_str}; do log::debug "${0}(): 8_line: [${(l:2:)${#x}}][${x}]"; done # DEBUG
+    log::info "NO  ==> \${(ps:$'\_n':)string} does not recognize the escape character \$'\_n'."
 
-    log_info "SUMMARY:"
-    log_info "\t\${(f)name} \t\t character - YES / sequence - NO."
-    log_info "\t\${(ps:\ n:)name} \t character - YES / sequence - NO."
-    log_info "\t\${(s:\ n:)name} \t character - NO / sequence - YES."
+    log::info "SUMMARY:"
+    log::info "\t\${(f)name} \t\t character - YES / sequence - NO."
+    log::info "\t\${(ps:\ n:)name} \t character - YES / sequence - NO."
+    log::info "\t\${(s:\ n:)name} \t character - NO / sequence - YES."
 }
 #experiment_0026 "${@}"
 
 
 function experiment_0025() {
-#    log_info_header "Search & replace."
+#    log::info_header "Search & replace."
 
     string="foo[bar]fizz[buzz]wizz[bang]cat"
     echo "original string\t\t\t[ ${string} ]"
@@ -289,7 +299,7 @@ function experiment_0025() {
 
 
 function experiment_0024() {
-    log_info_header "Explore other escape sequences and their effects."
+    log::info_header "Explore other escape sequences and their effects."
 
     #             1234567890123456789012345 [25 chars with escape sequences]
     #             1234 5678 9012 34567 8901 [21 chars with escape characters]
@@ -310,7 +320,7 @@ function experiment_0024() {
 
 
 function experiment_0023() {
-    log_info_header "Explore the escape sequence \\e."
+    log::info_header "Explore the escape sequence \\e."
 
     function sgrattrib() { echo "\e[${@}m" }
     local fmt_reset="$(sgrattrib "0")"
@@ -337,7 +347,7 @@ function experiment_0023() {
 #    str=${str//'\e'/ESC}    ; echo "slash-e:\t\t[${str}]"       # Finds "\e[...m" strings.
 #    str=${str//'\\e'/ESC}   ; echo "slash-slash-e:\t\t[${str}]" # Finds...nothing.
 
-    log_info "Create a multiline from an array to check how it handles newlines."
+    log::info "Create a multiline from an array to check how it handles newlines."
     lines=("aaa" "bbb" "ccc" "ddd")
     local multiline=${(F)lines} # Join using newline.
     echo "multiline:\t\t[${multiline}]"
@@ -346,7 +356,7 @@ function experiment_0023() {
     local multiline_escape_seq=${multiline//'\n'/NNN}
     echo "seek escape_seq:\t\t[${multiline_escape_seq}]"
 
-    log_info "Create a multiline from a string with escape sequences to check how it handles newlines."
+    log::info "Create a multiline from a string with escape sequences to check how it handles newlines."
     lines="www\nxxx\nyyy\nzzz"
     local multiline=${(F)lines} # Join using newline.
     echo "multiline:\t\t[${multiline}]"
@@ -363,9 +373,9 @@ function experiment_0023() {
 
 
 function experiment_0022() {
-    log_info_header "Explore command and parameter expansion."
+    log::info_header "Explore command and parameter expansion."
 
-    log_info "See IFS parameter in \"The Z Shell Manual\", v5.9, pg. 104."
+    log::info "See IFS parameter in \"The Z Shell Manual\", v5.9, pg. 104."
     # Useful script calls for testing:
     #zsh shell_scripts/scratchpad.zsh foo bar "this isn\nnnewline" "lasv\vvr\rrtn\nnx" "some t\tt done" "*"
     #zsh shell_scripts/scratchpad.zsh foo bar "this isN\nNnewline" "lasV\vVR\rRtN\nNx" "some T\tT done" "*"
@@ -376,7 +386,7 @@ function experiment_0022() {
     echo "Un-Quoted command substitutionen c:"
     for arg in $( echo_args ${@} ); do echo "\t=>[${arg}]"; done
 
-    log_info " \
+    log::info " \
     # NOTE: Use double quotes around a command substitution (i.e., "\$\(...\)") to\n
     # prevent the shell from breaking up the output into words using \$IFS\n
     # (Internal Field Separators = { space, tab, newline, NUL } by default).\n
@@ -388,14 +398,14 @@ function experiment_0022() {
 
 
 function experiment_0021() {
-    log_info_header "Use parameter expansion flags to pad strings."
+    log::info_header "Use parameter expansion flags to pad strings."
 
     local string="string"
 #    local string=( "string" "string2" )
     local length=20
     local modified_string
 
-    log_info "Left-padding:"
+    log::info "Left-padding:"
 
     modified_string=( ${(l:20::^::X:)string} )
     echo "string: [${string}] ==> [${modified_string}]"
@@ -418,7 +428,7 @@ function experiment_0021() {
     modified_string=${(l:20:)string}
     echo "string: [${string}] ==> [${modified_string}]"
 
-    log_info "Right-padding:"
+    log::info "Right-padding:"
 
     modified_string=${(r:20::^::X:)string}
     echo "string: [${string}] ==> [${modified_string}]"
@@ -441,12 +451,12 @@ function experiment_0021() {
     modified_string=${(r:20:)string}
     echo "string: [${string}] ==> [${modified_string}]"
 
-    log_info "Center-padding:"
+    log::info "Center-padding:"
 
     modified_string=${(l:10::abcd::>:r:20::xyz::<:)string}
     echo "string: [${#${string}}][${string}] ==> [${#${modified_string}}][${modified_string}]"
 
-    log_info "Padding a string with control characters:"
+    log::info "Padding a string with control characters:"
     local eseq_string="12345\e[1m678\t90\e[0m"
     echo "eseq_string: [${#eseq_string}][${eseq_string}]"
     ctrl_string=$(echo "${eseq_string}")
@@ -465,9 +475,9 @@ function experiment_0021() {
     local visual_string=$(_visual_string "${eseq_string}")
     echo "visual_string: [${#visual_string}][${visual_string}]"
 
-    log_info "==> Padding parameter expansion flags treat control characters as regular characters!"
-    log_info "\tTo pad correctly we need the length of the line without them..."
-    log_info "\tUse the following command: visual_line=\"\${(S)line//\$'\e'\[[0-9;]*m/}"
+    log::info "==> Padding parameter expansion flags treat control characters as regular characters!"
+    log::info "\tTo pad correctly we need the length of the line without them..."
+    log::info "\tUse the following command: visual_line=\"\${(S)line//\$'\e'\[[0-9;]*m/}"
 
 
     function center() {
@@ -487,16 +497,16 @@ function experiment_0021() {
     }
     center2 "hello" "_"
 
-    log_info "Explore variations in how to encode padding:"
+    log::info "Explore variations in how to encode padding:"
 
     local str mod
     # This is the baseline modified string.
-    log_info "Baseline padding:"
+    log::info "Baseline padding:"
     base=${(l:20::-::>:r:20::=::<:)string}
     echo "base string: [${#${string}}][${string}] ==> [${#${base}}][${base}]"
 
     # This is the string we apply the variables to.
-    log_info "Mod using local variables:"
+    log::info "Mod using local variables:"
     local char_a="-"
     local char_b=">"
     local char_c="="
@@ -505,7 +515,7 @@ function experiment_0021() {
     echo "mod1 string: [${#${string}}][${string}] ==> [${#${mod1}}][${mod1}]"
 
     # This is the string we apply the associative array to.
-    log_info "Mod using associative array variables:"
+    log::info "Mod using associative array variables:"
     typeset -A CHAR=(
         [a]="-"
         [b]=">"
@@ -517,13 +527,13 @@ function experiment_0021() {
     echo "mod2 string: [${#${string}}][${string}] ==> [${#${mod2}}][${mod2}]"
 
     # This is the string we use "(delim)" instead of ":delim:".
-    log_info "Mod using parentheses as flag delimiters:"
+    log::info "Mod using parentheses as flag delimiters:"
     mod3=${(pl(20)(-)(>)pr(20)(=)(<))string}
     echo "mod3 string: [${#${string}}][${string}] ==> [${#${mod3}}][${mod3}]"
 
     # This is the string we try different flags on.
     typeset -A VARS=( [a]="-" )
-    log_info "Mod using other flags..."
+    log::info "Mod using other flags..."
     mod4=${(Pl(20)(-)(>)Pr(20)(${VARS[a]})(<))string}
     echo "mod4 string: [${#${string}}][${string}] ==> [${#${mod4}}][${mod4}]"
 
@@ -538,7 +548,7 @@ function experiment_0021() {
     mod9=${(Pl(20)(-)(>)Pr(20)({VARS[a]})(<))string}
     echo "mod9 string: [${#${string}}][${string}] ==> [${#${mod9}}][${mod9}]"
 
-    log_info "Just create a list of N chars..."
+    log::info "Just create a list of N chars..."
     y=""; x=${(l:10:)y}; echo "A:\t[${x}]"
 #    x=${(l:11::x:)""}; echo "B:\t[${x}]"    # FAILS with "parameter not set"
     x=${(l:10:):-}; echo "C:\t[${x}]"
@@ -550,7 +560,7 @@ function experiment_0021() {
 
 
 function experiment_0020() {
-    log_info_header "Look at using exit codes given 'set -e' in our init module."
+    log::info_header "Look at using exit codes given 'set -e' in our init module."
 
     my_function() {
         echo "This message will NOT be printed."
@@ -560,7 +570,7 @@ function experiment_0020() {
 
 #    my_function
     echo "Function exit status: $?"
-    log_info_header "Experiment with _max_string_length() function."
+    log::info_header "Experiment with _max_string_length() function."
 
     len=$(_max_string_length "${@}")
     exit_code=$?
@@ -572,26 +582,26 @@ function experiment_0020() {
     exit_code=$?
     echo "output: [${len}]\texit code: [${exit_code}]"
 
-    #log_info_header "${@}"
+    #log::info_header "${@}"
 
 }
 #experiment_0020 "${@}"
 
 
 function experiment_0019() {
-    log_info_header "Split args into an array using word and newline delimiter."
+    log::info_header "Split args into an array using word and newline delimiter."
 
 if false; then
 
-    log_info "Cast args into an array, loop through array, and bracket each item:"
+    log::info "Cast args into an array, loop through array, and bracket each item:"
     local args=( ${@} )
     for x in ${args[@]}; do
         echo "[${x}]"
     done
-    log_info "==> Works!"
+    log::info "==> Works!"
 #    echo "{\n  \"argx\": ["; for argxx in "${argx[@]}"; do echo "    \"${argxx}\","; done; echo "  ]\n}"
 
-    log_info "Loop through the args array and split each item:"
+    log::info "Loop through the args array and split each item:"
     local args2=()
     local split_arg arg item
     for arg in ${args[@]}; do
@@ -602,9 +612,9 @@ if false; then
             echo "\t[${item}]"
         done
     done
-    log_info "==> Works!"
+    log::info "==> Works!"
 
-    log_info "Explore why (f) is not working:"
+    log::info "Explore why (f) is not working:"
     split_args=( ${(f)args} )
     split_args=( "${(s:\n:)args}" )
     echo "With an echo loop:"
@@ -613,9 +623,9 @@ if false; then
     done
     echo "With printf lines:"
     printf "["; printf "[%s]" ${split_args}; printf "]"; echo
-    log_info "==> -\(oo)/- (f) is opaque; it does not work as expected because it treats input as a single string using IFS as delimiter..."
+    log::info "==> -\(oo)/- (f) is opaque; it does not work as expected because it treats input as a single string using IFS as delimiter..."
 
-    log_info "Loop through input args and add to an array after splitting each arg:"
+    log::info "Loop through input args and add to an array after splitting each arg:"
     echo "args = [${@}]"
     local array=()
     local e
@@ -623,35 +633,35 @@ if false; then
         array+=( "${(s:\n:)e}" )
     done
     for e in ${array} ; do echo "[${e}]" ; done
-    log_info "==> Works!"
+    log::info "==> Works!"
 
-    log_info "Simplify into a single command line:"
+    log::info "Simplify into a single command line:"
 
-    log_info "print out all unquoted args:"
+    log::info "print out all unquoted args:"
     for e in ${@} ; do echo "[${e}]" ; done
 
-    log_info "print out all quoted args:"
+    log::info "print out all quoted args:"
     for e in "${@}" ; do echo "[${e}]" ; done
 
-    log_info "Loop over the unquoted array:"
+    log::info "Loop over the unquoted array:"
     for e in ${args} ; do echo "[${e}]" ; done
 
-    log_info "Loop over the quoted array:"
+    log::info "Loop over the quoted array:"
     for e in "${args}" ; do echo "[${e}]" ; done
 
-    log_info "Split the args array with newline: \${(s:\_n:)\${@[@]}}"
+    log::info "Split the args array with newline: \${(s:\_n:)\${@[@]}}"
     local array=( "${(s:\n:)${@[@]}}" )
     for e in ${array} ; do echo "[${e}]" ; done
-    log_info "==> Works! Use this when we want args concatenated first before splitting by newline."
+    log::info "==> Works! Use this when we want args concatenated first before splitting by newline."
 
-    log_info "Split the args array with newline, but treat each array element as a separate word: \${(@s:\_n:)\${@[@]}}"
+    log::info "Split the args array with newline, but treat each array element as a separate word: \${(@s:\_n:)\${@[@]}}"
     local array=( "${(@s:\n:)${@[@]}}" )
     for e in ${array} ; do echo "[${e}]" ; done
-    log_info "==> Works! Use this when we want to treat each arg as a line and split each argument individually by newline."
+    log::info "==> Works! Use this when we want to treat each arg as a line and split each argument individually by newline."
 
 fi
 
-    log_info "Replace escape sequences before we split because we will cast some as newlines."
+    log::info "Replace escape sequences before we split because we will cast some as newlines."
 
 #    echo "Original args:"
 #    for e in ${@} ; do echo "-[${e}]" ; done
@@ -680,59 +690,59 @@ fi
     echo "Cleansed concatenated args as lines:"
     for e in ${lines} ; do echo "c[${e}]" ; done ; echo
 
-    log_info "==> Works! See models of arg individuality vs. arg concatenation above."
+    log::info "==> Works! See models of arg individuality vs. arg concatenation above."
 
     # NOTE: You can test the cleansed lines using this command:
     # $ zsh scratchpad.zsh foo bar "this isn\nnnewline" "lasv\vvr\rrtn\nnx" "some t\tt done" "*"
 
-#    log_info "banner using the scratchpad-processed args list:"
-    log_info_header "${lines}"
+#    log::info "banner using the scratchpad-processed args list:"
+    log::info_header "${lines}"
 #
-#    log_info "banner using the raw args list:"
-    log_info_header "${@}"
+#    log::info "banner using the raw args list:"
+    log::info_header "${@}"
 }
 #experiment_0019 "${@}"
 
 
 function experiment_0018() {
-    log_info_header "Debug inputs to logging functions logging newlines."
+    log::info_header "Debug inputs to logging functions logging newlines."
 
-    log_info "string = \ \\ \\\ \\\\ \\\\\ 0"
+    log::info "string = \ \\ \\\ \\\\ \\\\\ 0"
     string="\\\\0"
     echo "${string}"
-    log_info "${string}"
+    log::info "${string}"
 
-    log_info "string = <tab>a[<esc:\_0>b<newline><esc:\_n>]<newline>c"
+    log::info "string = <tab>a[<esc:\_0>b<newline><esc:\_n>]<newline>c"
     string="\ta[\\\0b\\\n]\nc"
     echo ${string}
     echo "${string}"
-    log_info ${string}
-    log_info "${string}"
+    log::info ${string}
+    log::info "${string}"
 
     _log "_log()" ${string}
     _log "_log() ${string}"
     _info "_info()" ${string}
-    log_info "log_info()" ${string}
+    log::info "log::info()" ${string}
 
-    log_info_header "this is a horizontal tab: [\t]"
-    log_info_header "this is a vertical tab: [\v]"
-    log_info_header "this is a newline: [\n]"
+    log::info_header "this is a horizontal tab: [\t]"
+    log::info_header "this is a vertical tab: [\v]"
+    log::info_header "this is a newline: [\n]"
 
-    log_info "Define a new log_info_xxx() to test out \_n, \_t, etc."
+    log::info "Define a new log::info_xxx() to test out \_n, \_t, etc."
     function _xxx()     { echo "${fmt_cyan}${@}${fmt_reset}" }
-    function log_info_xxx()  { echo "$(_log "$(_xxx "${@}")")" }
-    log_info_xxx "hola" ${string}
+    function log::info_xxx()  { echo "$(_log "$(_xxx "${@}")")" }
+    log::info_xxx "hola" ${string}
 
 }
 #experiment_0018 "${@}"
 
 
 function experiment_0017() {
-    log_info_header "Print script dirpath and name."
+    log::info_header "Print script dirpath and name."
 
-    log_info "These commands respond differently inside and outside a function:"
-    log_info "\t\$(dirname "\${0}")"
-    log_info "\t\$(basename "\${ZSH_ARGZERO}")"
+    log::info "These commands respond differently inside and outside a function:"
+    log::info "\t\$(dirname "\${0}")"
+    log::info "\t\$(basename "\${ZSH_ARGZERO}")"
     local script_dirpath=$(dirname "${0}")            # Original script directory path.
     local script_name=$(basename "${ZSH_ARGZERO}")    # Original script filename.
 
@@ -742,7 +752,7 @@ function experiment_0017() {
 
 
 function experiment_0016() {
-    log_info_header "Convert a string into an absolute path using history expansion modifiers"
+    log::info_header "Convert a string into an absolute path using history expansion modifiers"
 
     local dirs=()
     dirs+="/absolute/path"
@@ -771,7 +781,7 @@ function experiment_0016() {
         echo "\t==>\t[${dir}]"
     done
 
-    log_info "Replace tilde in string:"
+    log::info "Replace tilde in string:"
     local x="~/tilde"
     echo ${x}
     echo ${x/tilde/xxx}
@@ -784,7 +794,7 @@ function experiment_0016() {
 
 
 function experiment_0015() {
-    log_info_header "Explore discovering the types of shell parameters (manual pg. 170)"
+    log::info_header "Explore discovering the types of shell parameters (manual pg. 170)"
 
     # Try a few different things.
     typeset -l lowercase_var="HOLA" # Always converts to lowercase on assignment
@@ -836,7 +846,7 @@ function experiment_0015() {
 
 
 function experiment_0014() {
-    log_info_header "Explore Prompting User for Input"
+    log::info_header "Explore Prompting User for Input"
 
     echo "--- Basic Read (no explicit prompt) ---"
     echo "Please enter something:"
@@ -871,22 +881,22 @@ function experiment_0014() {
 
 
 function experiment_0013() {
-    log_info_header "Explore Parsing CLI Arguments manually"
-    log_info "Requirements:"
-    log_info "[P1] Support short and long flags (presence is a switch: e.g., -x, --verbose)."
-    log_info "[P1] Support short and long options (param/value pair: e.g., -p=value, --param=value)."
-    log_info "[P1] Mixed order of flags and/or options (e.g., -a --bar=foo -c --help)."
-    log_info "[P1] Required vs. optional parameters."
-    log_info "[P1] Do not assign flags as option values."
-    log_info "[P1] Everything after "--" is positional."
-    log_info "[P2] Different option arg/value separator (e.g., -p value vs. -p=value)."
-    log_info "[P2] Chained/combined/stacked short flags (e.g., -alF vs. -a -l -F)."
-    log_info "Non-requirements:"
-    log_info "What do we do when we find an unexpected argument, do we flag everything after that as positional?"
-    log_info "What do we do when we find an unrecognized flag or option, do we flag everything after that as positional or quit?"
-    log_info "https://xpmo.gitlab.io/post/using-zparseopts/"
-    log_info "try this script with the following command:"
-    log_info "[ sandbox.zsh -r=foo=car -d=foo -h -z --y "single_word" --x="complex='value'" -v ]"
+    log::info_header "Explore Parsing CLI Arguments manually"
+    log::info "Requirements:"
+    log::info "[P1] Support short and long flags (presence is a switch: e.g., -x, --verbose)."
+    log::info "[P1] Support short and long options (param/value pair: e.g., -p=value, --param=value)."
+    log::info "[P1] Mixed order of flags and/or options (e.g., -a --bar=foo -c --help)."
+    log::info "[P1] Required vs. optional parameters."
+    log::info "[P1] Do not assign flags as option values."
+    log::info "[P1] Everything after "--" is positional."
+    log::info "[P2] Different option arg/value separator (e.g., -p value vs. -p=value)."
+    log::info "[P2] Chained/combined/stacked short flags (e.g., -alF vs. -a -l -F)."
+    log::info "Non-requirements:"
+    log::info "What do we do when we find an unexpected argument, do we flag everything after that as positional?"
+    log::info "What do we do when we find an unrecognized flag or option, do we flag everything after that as positional or quit?"
+    log::info "https://xpmo.gitlab.io/post/using-zparseopts/"
+    log::info "try this script with the following command:"
+    log::info "[ sandbox.zsh -r=foo=car -d=foo -h -z --y "single_word" --x="complex='value'" -v ]"
 
     # Comments/Notes:
     # - Option: 'getopts'
@@ -909,7 +919,7 @@ function experiment_0013() {
     #   - We are explicit and transparent about handling arguments, which
     #     makes it easier to maintain long-term.
 
-    log_info "Reference: https://gist.github.com/mattmc3/804a8111c4feba7d95b6d7b984f12a53"
+    log::info "Reference: https://gist.github.com/mattmc3/804a8111c4feba7d95b6d7b984f12a53"
 
     function parseopts_demo() {
         local args=("${@}")
@@ -960,7 +970,7 @@ function experiment_0013() {
         echo "positional:\t["${positional}"]"
         echo
 
-        log_info "[SUCCESS] ==> Follow the argument parsing pattern from this experiment."
+        log::info "[SUCCESS] ==> Follow the argument parsing pattern from this experiment."
     }
     parseopts_demo "${@}"
 
@@ -999,16 +1009,16 @@ function experiment_0013() {
 
 
 function experiment_0012() {
-    log_info_header "Explore Parsing CLI Arguments with 'zparseopts'"
-    log_info "Requirements:"
-    log_info "1) Flags (or switches), short and long (e.g., -x, --verbose)."
-    log_info "2) Options, short and long (e.g., -p=value, --param=value)."
-    log_info "3) Combined/stacked short flags (e.g., -alF vs. -a -l -F)."
-    log_info "4) Mixed order of flags and/or options (e.g., -a --bar=foo -c --help)."
-    log_info "5) Different option arg/value separator (e.g., -p value vs. -p=value)."
-    log_info "6) Required vs. optional parameters."
-    log_info "7) Do not assign flags as option values."
-    log_info "https://xpmo.gitlab.io/post/using-zparseopts/"
+    log::info_header "Explore Parsing CLI Arguments with 'zparseopts'"
+    log::info "Requirements:"
+    log::info "1) Flags (or switches), short and long (e.g., -x, --verbose)."
+    log::info "2) Options, short and long (e.g., -p=value, --param=value)."
+    log::info "3) Combined/stacked short flags (e.g., -alF vs. -a -l -F)."
+    log::info "4) Mixed order of flags and/or options (e.g., -a --bar=foo -c --help)."
+    log::info "5) Different option arg/value separator (e.g., -p value vs. -p=value)."
+    log::info "6) Required vs. optional parameters."
+    log::info "7) Do not assign flags as option values."
+    log::info "https://xpmo.gitlab.io/post/using-zparseopts/"
 
     # Comments/Notes:
     # - Option: 'getopts'
@@ -1031,11 +1041,11 @@ function experiment_0012() {
     #   - We are explicit and transparent about handling arguments, which
     #     makes it easier to maintain long-term.
 
-    log_info "EXPERIMENT: Use 'zparseopts' for zsh scripts."
-    log_warning "==> Concerns about maintenance and usage of this tool."
-    log_warning "Due to the opaque nature of how it operates, we would likely"
-    log_warning "need refreshers every time it needs to be updated or used."
-    log_warning "Experimentation steps shown below for reference."
+    log::info "EXPERIMENT: Use 'zparseopts' for zsh scripts."
+    log::warning "==> Concerns about maintenance and usage of this tool."
+    log::warning "Due to the opaque nature of how it operates, we would likely"
+    log::warning "need refreshers every time it needs to be updated or used."
+    log::warning "Experimentation steps shown below for reference."
 
     # Declare an associative array to specify flags and options.
     local -A spec
@@ -1049,26 +1059,26 @@ function experiment_0012() {
     )
     # Print out the associative array as 'zparseopts' expects it.
     # Using parameter expansion flags, "${array[@]}" and "${(@)array}" are equivalent.
-    log_info "associative array spec: (printed in JSON format by looping through all key/value pairs)"
+    log::info "associative array spec: (printed in JSON format by looping through all key/value pairs)"
     echo "{\n  \"spec\": {"; for k v in "${(kv)spec[@]}"; do echo "    \"${k}\": \"${v}\","; done; echo "  }\n}"
-    log_info "\${spec[@]}:"
+    log::info "\${spec[@]}:"
     echo ${spec[@]}
-    log_info "\${(k)spec[@]}:"
+    log::info "\${(k)spec[@]}:"
     echo ${(k)spec[@]}
-    log_info "\${(v)spec[@]}:"
+    log::info "\${(v)spec[@]}:"
     echo ${(v)spec[@]}
-    log_info "\${(kv)spec[@]}:"
+    log::info "\${(kv)spec[@]}:"
     echo ${(kv)spec[@]}
-    log_info "zip up keys and values:"
+    log::info "zip up keys and values:"
     local keys=(${(k)spec[@]})
     local values=(${(v)spec[@]})
     echo ${keys:^values}
     echo ${keys:^^values}
-    log_info "output keys/values with a = delimiter via a loop:"
+    log::info "output keys/values with a = delimiter via a loop:"
     for k v in "${(kv)spec[@]}"
         do echo "${k}=${v}"
     done
-#    log_info "output keys/values with a = delimiter via parameter expansion flags:"
+#    log::info "output keys/values with a = delimiter via parameter expansion flags:"
 #    echo ${(j:=:kv)spec}
 #    echo ${(FkPkv)spec}
 #    echo ${(j:\n:u::=:::kv)spec}
@@ -1151,10 +1161,10 @@ function experiment_0012() {
 
 
 function experiment_0011() {
-    log_info_header "Capture multi-line output from a function with a null character delimiter"
+    log::info_header "Capture multi-line output from a function with a null character delimiter"
 
     # Print out elements of an array, one at a time.
-    log_info "Define an array explicitly and print out its elements, one at a time."
+    log::info "Define an array explicitly and print out its elements, one at a time."
     local arr_a=("first one" "then two" "finally three")
     for x in "${arr_a[@]}"; do echo "[${x}]" ; done
 
@@ -1169,28 +1179,28 @@ function experiment_0011() {
 
     # Get the string with null-delimited items and check it.
     local str_0delim_items=$(str_0_delimited_items)
-    log_info "Print out a string with null-delimited items."
+    log::info "Print out a string with null-delimited items."
     echo "[${str_0delim_items}]"
 
     # Experiment: Replace the null-delimiter with a semicolon using parameter expansion.
-    log_info "EXPERIMENT: Replace null-character with ';' using parameter expansion \${name//pattern/repl}."
+    log::info "EXPERIMENT: Replace null-character with ';' using parameter expansion \${name//pattern/repl}."
     str_semidelim_items=${str_0delim_items//$'\0'/;}
     echo "[${str_semidelim_items}]"
-    log_info "[SUCCESS] ==> Works! To look for the null character use \$'\\ 0' (sans <space>)."
+    log::info "[SUCCESS] ==> Works! To look for the null character use \$'\\ 0' (sans <space>)."
 
     # Experiment: Split using "read".
-    log_info "EXPERIMENT: Split the string with null-delimited items using 'read'."
+    log::info "EXPERIMENT: Split the string with null-delimited items using 'read'."
     arr_b=()
     printf "${str_0delim_items}" | while read -r -d '' item; do
         echo "str item: [${item}]"
         arr_b+="${item}"
     done
-    log_info "Print array created from null-delimited input:"
+    log::info "Print array created from null-delimited input:"
     for x in "${arr_b[@]}"; do echo "arr item: [${x}]" ; done
-    log_warning "[SUCCESS] ==> Works, but it uses an external command."
+    log::warning "[SUCCESS] ==> Works, but it uses an external command."
 
     # Experiment: Split using a while loop and parameter expansions.
-    log_info "EXPERIMENT: Split using a while loop and parameter expansions \${name%%pattern} and \${name:#pattern}."
+    log::info "EXPERIMENT: Split using a while loop and parameter expansions \${name%%pattern} and \${name:#pattern}."
     local arr_c=()
     local str_tmp="${str_0delim_items}"
     while [[ "${str_tmp}" == *$'\0'* ]]; do
@@ -1201,7 +1211,7 @@ function experiment_0011() {
     arr_c+="$str_tmp"
     echo "# items: ${#arr_c}"
     for x in "${arr_c[@]}"; do echo "item: [${x}]" ; done
-    log_warning "[SUCCESS] ==> Works, but it is verbose and funky (see the empty item)."
+    log::warning "[SUCCESS] ==> Works, but it is verbose and funky (see the empty item)."
 
     # Cast a string into an array:
     # - Use parameter expansion flags to split the string.
@@ -1210,17 +1220,17 @@ function experiment_0011() {
     #     split_string_0=${(0)string}   # "0" is shorthand for "ps:\0:"
     # - Use the string to populate an array:
     #     string_array=( ${split_string} )
-    log_info "EXPERIMENT: Use parameter expansion flag "0""
+    log::info "EXPERIMENT: Use parameter expansion flag "0""
     arr_d=(${(0)str_0delim_items})      # arr_d=(${(ps:\0:)str_0delim_items})
     echo "# items: ${#arr_d}"
     for x in "${arr_d[@]}"; do echo "arr item: [${x}]" ; done
-    log_info "[SUCCESS] ==> Works using parameter expansion!\nxxx"
-    log_info "==> Use this pattern:"
-    log_info "\tGiven a null-char delimited string:\t'str0_items'"
-    log_info "\tCast into an array of items:\t\tarr_items=(\${(0)str0_items})"
+    log::info "[SUCCESS] ==> Works using parameter expansion!\nxxx"
+    log::info "==> Use this pattern:"
+    log::info "\tGiven a null-char delimited string:\t'str0_items'"
+    log::info "\tCast into an array of items:\t\tarr_items=(\${(0)str0_items})"
 
     # Show issues with null character in parameter expansion substitution.
-    log_info "Show issues with null character in parameter expansion substitution."
+    log::info "Show issues with null character in parameter expansion substitution."
     my_string=$'part1\0part2\0part3'
     echo "${my_string}"
     echo "${my_string//\0/X}"
@@ -1231,7 +1241,7 @@ function experiment_0011() {
 
 
 function experiment_0010() {
-    log_info_header "Set a variable to the original script filename so we can reference it"
+    log::info_header "Set a variable to the original script filename so we can reference it"
 
     local SCRIPT_NAME0=$(basename "${ZSH_ARGZERO}") # Filename of original script file.
     local SCRIPT_NAME1=$(basename "$0")             # Name of current function.
@@ -1247,26 +1257,26 @@ function experiment_0010() {
 
 
 function experiment_0009() {
-    log_info_header "Test rendering of logging messages"
+    log::info_header "Test rendering of logging messages"
 
 #    display_sgr_codes
-    log_info "this is a sentence\nand another" "and a third"
-    log_warning
-    log_error
-    log_debug
+    log::info "this is a sentence\nand another" "and a third"
+    log::warning
+    log::error
+    log::debug
     _banner
 
     # "banner" is a syste mutility that prints out large text for banners.
     # banner "hello"
 
     echo "$(_info "this is a sentence\nand another")"
-    log_debug
+    log::debug
 }
 #experiment_0009 "${@}"
 
 
 function experiment_0008() {
-    log_info_header "Capture multi-line output from a function with a newline delimiter"
+    log::info_header "Capture multi-line output from a function with a newline delimiter"
 
     #echo "${!my_var*}"
     # Output: my_var1 my_var2
@@ -1309,7 +1319,7 @@ function experiment_0008() {
 
 
 function experiment_0007() {
-    log_info_header "Split args into distinct lines, including newline within an arg"
+    log::info_header "Split args into distinct lines, including newline within an arg"
 
     #--------------------------------------+
     # Synopsis:     split_into_lines [<arg>*]
@@ -1390,7 +1400,7 @@ function experiment_0007() {
 
 
 function experiment_0006() {
-    log_info_header "Check the type of a variable"
+    log::info_header "Check the type of a variable"
 
     function type_of_var() {
         local type_sig=$(declare -p "$@" 2>/dev/null)
@@ -1431,7 +1441,7 @@ function experiment_0006() {
 
 
 function experiment_0005() {
-    log_info_header "Parse a variable and print out each element"
+    log::info_header "Parse a variable and print out each element"
 
 #    local data=("element1" "element2" "element3")
 #    local data=("this" "is" "text")
@@ -1456,18 +1466,18 @@ function experiment_0005() {
 
 
 function experiment_0004() {
-    log_info_header "Test rendering of logging messages and other variables"
+    log::info_header "Test rendering of logging messages and other variables"
 
     display_sgr_codes
 
-    log_info
-    log_warning
-    log_error
-    log_debug
+    log::info
+    log::warning
+    log::error
+    log::debug
 
-    log_info_header "This is a banner message"
-    log_warning "This is a warning message."
-    log_error "This is an error message."
+    log::info_header "This is a banner message"
+    log::warning "This is a warning message."
+    log::error "This is an error message."
 
     echo ${ZSH_ARGZERO}
     echo ${ZSH_ARGZERO//.\//}
@@ -1483,7 +1493,7 @@ function experiment_0004() {
 
 
 function experiment_0003() {
-    log_info_header "Check a .zshrc file for specific commands and add them if necessary"
+    log::info_header "Check a .zshrc file for specific commands and add them if necessary"
 
     header="# Use chruby by default."
     pattern=$(cat <<EOS   # Parameter expansion of $(...) in here-document.
@@ -1546,7 +1556,7 @@ EOS
 
 
 function experiment_0002() {
-    log_info_header "Explore parsing command line options using 'getops' (2 options)"
+    log::info_header "Explore parsing command line options using 'getops' (2 options)"
 
     # Parse command line options. A leading `:` in the optstring suppresses
     # default error messaging by `getopts` and places option name in ${OPTARG}.
@@ -1570,7 +1580,7 @@ function experiment_0002() {
 
 
 function experiment_0001() {
-    log_info_header "Explore parsing command line options using 'getops' (1 option)"
+    log::info_header "Explore parsing command line options using 'getops' (1 option)"
 
     # --- Initialize variables with default values ---
     name="World" # Default name if -n is not provided
@@ -1621,21 +1631,21 @@ function experiment_0001() {
 # - To list all functions: print -l ${(k)functions}
 # - To create a title from each function, consider this pattern:
 #       local title="foobar"
-#       if [[ --title ]]; then echo ${title} ; else log_info_header ${title} ; fi
+#       if [[ --title ]]; then echo ${title} ; else log::info_header ${title} ; fi
 #--------------------------------------+--------------------------------------#
 function _framework_() {
 
-    log_info "all function names with \${(k)functions}:"
+    log::info "all function names with \${(k)functions}:"
     local f_names=${(k)functions}
     echo ${f_names}
 
-    log_info "filter a bespoke array by \"exp\" with \${aa[(R)*exp*]} except "R" only matches last instance:"
+    log::info "filter a bespoke array by \"exp\" with \${aa[(R)*exp*]} except "R" only matches last instance:"
     local array=("this is" "an array" "of an" "experiment" "explained")
     #txt="exp" ; local names=${array[(R)*${txt}*]}
     local names=${array[(R)*exp*]}
     echo ${names}
 
-    log_info "filter a bespoke associative array with \$name[(flags)exp]:"
+    log::info "filter a bespoke associative array with \$name[(flags)exp]:"
     local -A assoc_array
     assoc_array['abc']="foo"
     assoc_array['an array']="bar"
@@ -1650,7 +1660,7 @@ function _framework_() {
     #local names=${(k)assoc_array[(K)abc]}       # Works.
     #local names=${(k)assoc_array[(K)*"ex"*]}       # .
     echo "Key-matches:\t["${names}"]"
-    log_warning "==> matching depends on how the key was entered/quoted."
+    log::warning "==> matching depends on how the key was entered/quoted."
 
     local foo=(bar baz)
     echo "${(@)${foo}[1]}"

@@ -135,24 +135,17 @@ function run() {
         chmod -R +x "${target}/bin"/* && log::info "  ==> Done." || log::warning "  ==> ERROR!"
 
         # Update the ~/.zshrc environment file.
-        local header="# Prepend personal scripts to PATH, to prioritize over system defaults."
-        local config="export PATH=\"${target}/bin:\${PATH}\""
-        local matches=$(grep -F "${config}" "${HOME}/.zshrc")
-        log::info "Checking if ~/.zshrc is configured with the personal scripts path..."
-        if [[ "${config}" == "${matches}" ]]; then
-            log::info "  ==> ~/.zshrc is already configured properly."
-        else
-            log::info "  Adding ${target}/ to ~/.zshrc"
-            echo >> "${HOME}/.zshrc"
-            echo "${header}" >> "${HOME}/.zshrc"
-            echo "${config}" >> "${HOME}/.zshrc"
-            log::info "  ==> ~/.zshrc updated."
-            log::info "Please run \"exec zsh\" to apply changes."
-        fi
+        local config_label="Personal Shell Scripts"
+        local -a scripts_config_array=(
+            "# Prepend personal scripts to PATH, to prioritize over system defaults."
+            "export PATH=\"${target}/bin:\${PATH}\""
+        )
+        local scripts_config="${(F)scripts_config_array}"
+        cfg::update_manifest "${HOME}/.zshrc" "${scripts_config}" "${config_label}"
 
+        # Final message.
         log::info "Installation complete: ${target}/{bin,lib} is now in sync."
         log::info "Don't forget to run \"exec zsh\" to apply any config changes."
-
     fi
 }
 
