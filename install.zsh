@@ -56,7 +56,7 @@ function () {
     echo "Cloned repository [${repo}] into [${temp_dirpath}]"
 
     # 4. Run the setup script from the cloned repository.
-    zsh "${temp_dirpath}/bin/install-shell-scripts.zsh" || {
+    zsh "${temp_dirpath}/bin/install-shell-scripts.zsh" --source="${temp_dirpath}" || {
         echo "Error: Failed to run the setup script." >&2
         exit 1
     }
