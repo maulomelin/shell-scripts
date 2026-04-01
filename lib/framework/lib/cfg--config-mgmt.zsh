@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2026 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: CFG (Configuration Management)
+# SPDX-FileComment:         [CFG] Configuration Management
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------

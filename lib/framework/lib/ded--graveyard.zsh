@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: DED (Functions Graveyard)
+# SPDX-FileComment:         [DED] Functions Graveyard
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------

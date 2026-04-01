@@ -2,12 +2,12 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: APP (Install Jekyll SSG)
+# SPDX-FileComment:         [APP] Install Jekyll SSG
 # -----------------------------------------------------------------------------
 
-# Initialize the script environment (use portable `dirname` and `printf`).
-source "$(dirname "${0}")/../lib/init.zsh" || {
-    printf "\e[91mError: Failed to initialize script environment.\e[0m\n"
+# Initialize script framework (use `dirname` and `printf` for portability).
+source "$(dirname "${0}")/../lib/framework/init.zsh" || {
+    printf "\e[91mError: Failed to initialize script framework.\e[0m\n"
     exit 1
 }
 

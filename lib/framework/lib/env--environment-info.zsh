@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: ENV (Environment)
+# SPDX-FileComment:         [ENV] Environment Info
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------

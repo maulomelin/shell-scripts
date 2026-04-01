@@ -2,12 +2,12 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: DAT (Data Type Safety)
+# SPDX-FileComment:         [DAT] Data Types
 # -----------------------------------------------------------------------------
-# This library provides a variety of type safety utilities. The table below is
-# a summary the different types of type-safe functions available:
+# This library provides a variety of data type safety utilities.
+# The table below is a summary the different type-safe functions:
 #
-#   TYPE (PREFIX)       SYNTAX
+#   TYPE                SYNTAX
 #   Predicate           is_xxx <name> <arg>
 #                       has_xxx <name> <arg>
 #   Normalization       as_xxx <name> <arg> [<arg> ...]

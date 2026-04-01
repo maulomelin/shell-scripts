@@ -2,13 +2,12 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: n/a (Framework Initialization Script)
+# SPDX-FileComment:         Framework Initialization Script
 # -----------------------------------------------------------------------------
 
 # Fail fast if not running under zsh.
 #   - ${ZSH_NAME} is only set if the script is running under zsh.
-#   - Test condition using single brackets for portability.
-#   - Use "printf" for portability.
+#   - Use single brackets and `printf` for portability.
 if [ -z "${ZSH_NAME}" ] ; then
     printf "\e[91m"
     printf "Error: This script requires zsh.\n"
@@ -39,22 +38,22 @@ setopt NO_CASE_MATCH   # Enable case-insensitive pattern matching.
 setopt EXTENDED_GLOB   # Enable extended globbing features.
 #setopt XTRACE         # DEBUG: Trace command execution and expansion.
 
-# Source common framework libraries.
+# Source framework libraries.
 #   - Source framework libraries only if no function name collisions are found.
 #   - Run checks inside an anonymous function to keep the global scope clean.
 function () {
 
-    # Common framework libraries.
-    local lib_dirpath="${${(%):-%x}:A:h}/framework"
+    # Framework libraries.
+    local lib_dirpath="${${(%):-%x}:A:h}/lib"
     local -a libs=(
-        "lib-reg--global-registry.zsh"
-        "lib-log--logging.zsh"
-        "lib-sys--system.zsh"
-        "lib-dat--data-type-safety.zsh"
-        "lib-env--environment.zsh"
-        "lib-err--error-handling.zsh"
-        "lib-ded--graveyard.zsh"
-        "lib-cfg--config-mgmt.zsh"
+        "reg--global-registry.zsh"
+        "log--logging.zsh"
+        "sys--system.zsh"
+        "dat--data-types.zsh"
+        "env--environment.zsh"
+        "err--error-handling.zsh"
+        "cfg--config-mgmt.zsh"
+        "ded--graveyard.zsh"
         # TODO: Add new libraries here.
     )
 

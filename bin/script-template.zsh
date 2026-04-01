@@ -2,7 +2,8 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: APP (Application Script Template)
+# SPDX-FileComment:         [APP] Script Template
+                            # TODO: Update namespace/description above.
 # SPDX-FileComment: <text>
 #   This is the base template for Zsh shell scripts.
 #   Configure the script by addressing all "TODO" tasks.
@@ -10,9 +11,9 @@
 # </text>
 # -----------------------------------------------------------------------------
 
-# Initialize script environment (use `dirname` and `printf` for portability).
-source "$(dirname "${0}")/../lib/init.zsh" || {
-    printf "\e[91mError: Failed to initialize script environment.\e[0m\n"
+# Initialize script framework (use `dirname` and `printf` for portability).
+source "$(dirname "${0}")/../lib/framework/init.zsh" || {
+    printf "\e[91mError: Failed to initialize script framework.\e[0m\n"
     exit 1
 }
 
@@ -153,7 +154,7 @@ function main() {
     # TODO: Add all run() arguments to the array below.
     local -a args=( "${batch}" )
     if [[ "${#args}" != "${#args:#}" ]]; then
-        sys::abort "Invalid state: Empty args."
+        sys::abort "Invalid state: Check args."
     fi
 
     # Execute core logic.

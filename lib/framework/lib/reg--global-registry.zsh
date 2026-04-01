@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: REG (Global Registry)
+# SPDX-FileComment:         [REG] Global Registry
 # SPDX-FileComment: <text>
 #   Access the global registry directly via ${REG[<key>]}.
 #   It is implemented as a read-only associative array.

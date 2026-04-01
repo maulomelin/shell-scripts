@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: SYS (System)
+# SPDX-FileComment:         [SYS] System
 # -----------------------------------------------------------------------------
 
 # Initialize private registry.

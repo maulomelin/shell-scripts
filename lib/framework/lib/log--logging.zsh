@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: LOG (Logging)
+# SPDX-FileComment:         [LOG] Logging
 # -----------------------------------------------------------------------------
 # TODO: Do we write a module init routine to validate all registry variables,
 #       such as verbosity? Do we need to ensure default/init values are valid

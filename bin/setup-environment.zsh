@@ -2,12 +2,12 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: APP (Application Script Template)
+# SPDX-FileComment:         [APP] Environment Setup (Apps, Tools, and Configs)
 # -----------------------------------------------------------------------------
 
-# Initialize script environment (use `dirname` and `printf` for portability).
-source "$(dirname "${0}")/../lib/init.zsh" || {
-    printf "\e[91mError: Failed to initialize script environment.\e[0m\n"
+# Initialize script framework (use `dirname` and `printf` for portability).
+source "$(dirname "${0}")/../lib/framework/init.zsh" || {
+    printf "\e[91mError: Failed to initialize script framework.\e[0m\n"
     exit 1
 }
 

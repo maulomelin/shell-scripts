@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: ERR (Error Handling)
+# SPDX-FileComment:         [ERR] Error Handling
 # -----------------------------------------------------------------------------
 # TODO: Add utilities to this library, such as:
 #       cleanup()       Handle the EXIT or ERR traps using the `trap` command.
