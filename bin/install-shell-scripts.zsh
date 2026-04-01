@@ -65,7 +65,7 @@ Options:
     -d, --delete
         Delete extraneous files and directories from the target directory.
         If unset, only files also present in <source> will be overwritten.
-        This is equivalent to a clean install of the {bin,lib} folders.
+        Setting it is equivalent to a clean install of the {bin,lib} folders.
 
     -n, --dry-run
         Show list of actions without taking any.

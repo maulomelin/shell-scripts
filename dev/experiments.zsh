@@ -19,7 +19,19 @@ source "$(dirname "${0}")/../lib/init.zsh" || {
     exit 1
 }
 
-function () {
+function experiment_0034() {
+    log::info_header "Experiment 034: Call a script from within a function."
+
+    local bin_dirpath="./bin"
+    zsh "${bin_dirpath}/script-template.zsh" --help || {
+        echo "\e[91mError: Failed to run the script template with --help.\e[0m\n"
+        exit 1
+    }
+}
+experiment_0034 "${@}"
+
+
+function experiment_0033() {
     log::info_header "Welcome to the Lab of Experiments!"
 
     local block_label="My config block (foobar)"
@@ -29,8 +41,9 @@ function () {
     )
     local config_block="${(F)config_block_array}"
     cfg::update_manifest "./zshrc.txt" "${config_block}" "${block_label}"
-
 }
+#experiment_0033 "${@}"
+
 
 function experiment_0032() {
     LOG_VERBOSITY=+0010
@@ -39,7 +52,7 @@ function experiment_0032() {
 #    display_sgr_codes
     sys::abort
 }
-experiment_0032 "${@}"
+#experiment_0032 "${@}"
 
 
 function experiment_0031() {
@@ -80,7 +93,7 @@ function experiment_0031() {
 
 #    abort
 }
-experiment_0031 "${@}"
+#experiment_0031 "${@}"
 
 
 function experiment_0030() {
