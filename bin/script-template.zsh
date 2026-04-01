@@ -108,6 +108,9 @@ function main() {
     log::set_verbosity "${verbosity}"               # Try to set to user input.
     verbosity=$(log::get_verbosity)                 # Get actual level.
 
+    # Log script identifier to mark the start of all logging.
+    log::info_header "# TODO: Give the script a short, friendly name here."
+
     # Handle help requests before validating other inputs.
     help=$(dat::validate_bool "help flag" "${help}" "${_APP[DEFAULT_HELP]}") || return 1
     if dat::is_true "${help}"; then usage; fi
@@ -119,7 +122,6 @@ function main() {
     # TODO: Perform input checks that would result in a sys::abort() here.
 
     # Display all processed arguments.
-    log::info_header "# TODO: Give the script a short, friendly name here."
     log::info "Arguments processed:"
     log::info "  Input:        [${args}]"
     log::info "  Used:         [${args_used}]"
