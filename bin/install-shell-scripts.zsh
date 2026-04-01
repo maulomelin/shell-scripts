@@ -201,9 +201,6 @@ function main() {
     if [[ -f "${target}" ]]; then
         sys::abort "Target is an existing file: [${target}]"
     fi
-    if [[ ! -w "${target}" ]]; then
-        sys::abort "No write permissions on target directory: [${target}]"
-    fi
 
     # Display all processed arguments.
     log::info "Arguments processed:"
