@@ -7,7 +7,7 @@
 
 function () {
     # --------------------------------------
-    log::info_header "Setup: Node.js"
+    log::info_header "Setup: Node.js (nvm)"
     #   - Use Node version manager (nvm).
     #   - https://nodejs.org/
     # --------------------------------------
@@ -23,4 +23,5 @@ function () {
     node -v     # Verify Node.js version >= "v24.14.1".
     log::info "Verify npm version >= \"11.11.0\"..."
     npm -v      # Verify npm version >= "11.11.0".
-}
+
+} || return 1

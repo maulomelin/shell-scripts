@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2026 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Setup: Visual Studio Code (VSCode)
+# SPDX-FileComment:         Setup: Shell Prompt, Aliases, and Functions
 # -----------------------------------------------------------------------------
 
 function () {
@@ -22,10 +22,16 @@ function () {
         "PROMPT=\"%B%F{226}[%?][%~] %# %f%b\""
     )
     local prompt_config="${(F)prompt_config_array}"
-    cfg::update_manifest "${HOME}/.zshrc" "${prompt_config}" "${prompt_label}"
+    cfg::update_config "${HOME}/.zshrc" "${prompt_config}" "${prompt_label}" || {
+        log::error "Failed to set the shell prompt config in [${HOME}/.zshrc]."
+        log::error "Check the manifest and try again."
+        return 1
+    }
+    log::info "Run \"exec zsh\" to apply config updates."
 
     # --------------------------------------
-    log::info_header "TODO: Setup: Shell aliases"
-    log::info_header "TODO: Setup: Shell functions"
+    log::info_header "TODO: Setup: Shell Aliases"
+    log::info_header "TODO: Setup: Shell Functions"
     # --------------------------------------
-}
+
+} || return 1

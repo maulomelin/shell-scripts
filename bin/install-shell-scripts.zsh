@@ -141,11 +141,15 @@ function run() {
             "export PATH=\"${target}/bin:\${PATH}\""
         )
         local scripts_config="${(F)scripts_config_array}"
-        cfg::update_manifest "${HOME}/.zshrc" "${scripts_config}" "${config_label}"
+        cfg::update_config "${HOME}/.zshrc" "${scripts_config}" "${config_label}" || {
+            log::error "Failed to set the scripts config in [${HOME}/.zshrc]."
+            log::error "Check the config and try again."
+            return 1
+        }
+        log::info "Run \"exec zsh\" to apply config updates."
 
-        # Final message.
+        # Success message.
         log::info "Installation complete: ${target}/{bin,lib} is now in sync."
-        log::info "Don't forget to run \"exec zsh\" to apply any config changes."
     fi
 }
 
@@ -203,26 +207,26 @@ function main() {
     fi
 
     # Display all processed arguments.
-    log::info "Arguments processed:"
-    log::info "  Input:        [${args}]"
-    log::info "  Used:         [${args_used}]"
-    log::info "  Ignored:      [${args_ignored}]"
-    log::info "Default settings:"
-    log::info "  Source:       [${_APP[DEFAULT_SOURCE_DIR]}]"
-    log::info "  Target:       [${_APP[DEFAULT_TARGET_DIR]}]"
-    log::info "  Delete:       [${_APP[DEFAULT_DELETE]}]"
-    log::info "  Dry Run:      [${_APP[DEFAULT_DRYRUN]}]"
-    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
-    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
-    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
-    log::info "Effective settings:"
-    log::info "  Source:       [${source}]"
-    log::info "  Target:       [${target}]"
-    log::info "  Delete:       [${delete}]"
-    log::info "  Dry Run:      [${dryrun}]"
-    log::info "  Verbosity:    [${verbosity}]"
-    log::info "  Batch:        [${batch}]"
-    log::info "  Help:         [${help}]"
+    log::debug "Arguments processed:"
+    log::debug "  Input:        [${args}]"
+    log::debug "  Used:         [${args_used}]"
+    log::debug "  Ignored:      [${args_ignored}]"
+    log::debug "Default settings:"
+    log::debug "  Source:       [${_APP[DEFAULT_SOURCE_DIR]}]"
+    log::debug "  Target:       [${_APP[DEFAULT_TARGET_DIR]}]"
+    log::debug "  Delete:       [${_APP[DEFAULT_DELETE]}]"
+    log::debug "  Dry Run:      [${_APP[DEFAULT_DRYRUN]}]"
+    log::debug "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::debug "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::debug "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::debug "Effective settings:"
+    log::debug "  Source:       [${source}]"
+    log::debug "  Target:       [${target}]"
+    log::debug "  Delete:       [${delete}]"
+    log::debug "  Dry Run:      [${dryrun}]"
+    log::debug "  Verbosity:    [${verbosity}]"
+    log::debug "  Batch:        [${batch}]"
+    log::debug "  Help:         [${help}]"
 
     # Issue warnings about the source and target directories.
     if [[ ! -d "${source}/bin" ]]; then

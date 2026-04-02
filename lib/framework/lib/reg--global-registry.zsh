@@ -2,11 +2,10 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         [REG] Global Registry
-# SPDX-FileComment: <text>
-#   Access the global registry directly via ${REG[<key>]}.
-#   It is implemented as a read-only associative array.
-#   This makes all values immutable and makes getter functions unecessary.
+# SPDX-FileComment: <text>  [REG] Global Registry
+#   - Access the global registry directly via ${REG[<key>]}.
+#   - Implemented as a read-only associative array, making all values immutable
+#     and getter functions unecessary.
 # </text>
 # -----------------------------------------------------------------------------
 

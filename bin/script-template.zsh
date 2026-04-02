@@ -2,13 +2,10 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         [APP] Script Template
-                            # TODO: Update namespace/description above.
-# SPDX-FileComment: <text>
-#   This is the base template for Zsh shell scripts.
-#   Configure the script by addressing all "TODO" tasks.
-#   TODO: Delete this "SPDX-FileComment" block and all "TODO" tasks before use.
-# </text>
+# SPDX-FileComment:         [APP] Template  # TODO: Update namespace and name.
+# -----------------------------------------------------------------------------
+# TODO: Configure the script by addressing all "TODO" tasks.
+# TODO: Delete all "TODO" tasks before use.
 # -----------------------------------------------------------------------------
 
 # Initialize script framework (use `dirname` and `printf` for portability).
@@ -123,20 +120,20 @@ function main() {
     # TODO: Perform input checks that would result in a sys::abort() here.
 
     # Display all processed arguments.
-    log::info "Arguments processed:"
-    log::info "  Input:        [${args}]"
-    log::info "  Used:         [${args_used}]"
-    log::info "  Ignored:      [${args_ignored}]"
-    log::info "Default settings:"
+    log::debug "Arguments processed:"
+    log::debug "  Input:        [${args}]"
+    log::debug "  Used:         [${args_used}]"
+    log::debug "  Ignored:      [${args_ignored}]"
+    log::debug "Default settings:"
     # TODO: Include default settings for additional parameters/flags here.
-    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
-    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
-    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
-    log::info "Effective settings:"
+    log::debug "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::debug "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::debug "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::debug "Effective settings:"
     # TODO: Include values for additional parameters/flags here.
-    log::info "  Verbosity:    [${verbosity}]"
-    log::info "  Batch:        [${batch}]"
-    log::info "  Help:         [${help}]"
+    log::debug "  Verbosity:    [${verbosity}]"
+    log::debug "  Batch:        [${batch}]"
+    log::debug "  Help:         [${help}]"
 
     # TODO: Perform input checks that would result in a log::warning() here.
 

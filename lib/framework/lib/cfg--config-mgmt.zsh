@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# Syntax:   cfg::update_manifest <config_file> <config_block> <block_label>
+# Syntax:   cfg::update_config <config_file> <config_block> <block_label>
 # Args:     <config_file>   Path to a config file.
 #           <config_block>  Multiline of config entries.
 #           <block_label>   Label for the config block.
@@ -23,18 +23,18 @@
 #     block is present. This allows the fencing markers to be changed
 #     without creating redundant entries of the same config block.
 # -----------------------------------------------------------------------------
-function cfg::update_manifest() {
+function cfg::update_config() {
     local min_args=3
     if (( $# < min_args )); then
-        log::error "Unable to update manifest: Insufficient args (min: ${min_args}): (${(j:, :)@})"
+        log::error "Unable to update config: Insufficient args (min: ${min_args}): (${(j:, :)@})"
         return 1
     fi
     local config_file=$1    # Path to config file to update.
     local config_block=$2   # Multiline of config entries.
     local block_label=$3    # Label for the config block.
 
-    local manifest="$(<> ${config_file})"
-    if [[ "${manifest}" == *"${config_block}"* ]]; then
+    local config="$(<> ${config_file})"
+    if [[ "${config}" == *"${config_block}"* ]]; then
         log::info "Config [${block_label}] already in [${config_file}]."
     else
         log::info "Config [${block_label}] not in [${config_file}]. Updating..."

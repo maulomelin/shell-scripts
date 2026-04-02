@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         [APP] Environment Setup (Apps, Tools, and Configs)
+# SPDX-FileComment:         [APP] Machine Setup (Apps, Tools, and Configs)
 # -----------------------------------------------------------------------------
 
 # Initialize script framework (use `dirname` and `printf` for portability).
@@ -36,8 +36,7 @@ Usage:
 
 Description:
 
-    Sets up a new environment by installing software, configuring tools, and
-    setting system paths.
+    Sets up a new machine by installing apps, tools, and configs.
 
 Options:
 
@@ -69,25 +68,12 @@ function run() {
     # Map function arguments to local variables.
     local batch="${1}"
 
-    local manifest_dirpath="${${(%):-%x}:A:h:h}/lib/manifests"
-    local -a manifests=(
-        "000--core.zsh"
-        "010--shell.zsh"
-        "020--chrome.zsh"
-        "030--github-cli.zsh"
-        "040--python-uv.zsh"
-        "050--node-nvm.zsh"
-        "060--ruby-chruby.zsh"
-        "070--vscode.zsh"
-        "080--productivity-apps.zsh"
-        # TODO: Add new manifests here.
-    )
-    local manifest script
+    local manifests_dirpath="${${(%):-%x}:A:h:h}/lib/manifests"
+    local -a manifests=( ${manifests_dirpath}/*.zsh )
+    local manifest
     for manifest in "${manifests[@]}"; do
-        script="${manifest_dirpath}/${manifest}"
-        source "${script}" || {
-            log::error "Failed to source [${script}]"
-            log::error "Check the manifest file."
+        source "${manifest}" || {
+            log::error "Failed on [${manifest}]. Check the manifest."
         }
     done
 }
@@ -124,18 +110,18 @@ function main() {
     batch=$(dat::validate_bool "batch flag" "${batch}" "${_APP[DEFAULT_BATCH]}") || return 1
 
     # Display all processed arguments.
-    log::info "Arguments processed:"
-    log::info "  Input:        [${args}]"
-    log::info "  Used:         [${args_used}]"
-    log::info "  Ignored:      [${args_ignored}]"
-    log::info "Default settings:"
-    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
-    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
-    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
-    log::info "Effective settings:"
-    log::info "  Verbosity:    [${verbosity}]"
-    log::info "  Batch:        [${batch}]"
-    log::info "  Help:         [${help}]"
+    log::debug "Arguments processed:"
+    log::debug "  Input:        [${args}]"
+    log::debug "  Used:         [${args_used}]"
+    log::debug "  Ignored:      [${args_ignored}]"
+    log::debug "Default settings:"
+    log::debug "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::debug "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::debug "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::debug "Effective settings:"
+    log::debug "  Verbosity:    [${verbosity}]"
+    log::debug "  Batch:        [${batch}]"
+    log::debug "  Help:         [${help}]"
 
     # Prompt user for confirmation, unless in batch mode.
     if dat::is_true "${batch}"; then

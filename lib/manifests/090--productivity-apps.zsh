@@ -28,4 +28,5 @@ function () {
     log::info "  [_] WeChat"
     log::info "  [_] Zoom"
     log::info "  [_] <add more here>"
-}
+
+} || return 1

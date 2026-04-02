@@ -169,22 +169,22 @@ function main() {
     repo=$(dat::validate_url "repo url" "${repo}" "${_APP[DEFAULT_REPO]}") || return 1
 
     # Display processed arguments.
-    log::info "Arguments processed:"
-    log::info "  Input:        [${args}]"
-    log::info "  Used:         [${args_used}]"
-    log::info "  Ignored:      [${args_ignored}]"
-    log::info "Default settings:"
-    log::info "  Source repo:  [${_APP[DEFAULT_REPO]}]"
-    log::info "  Target dir:   [${_APP[DEFAULT_DIR]}]"
-    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
-    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
-    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
-    log::info "Effective settings:"
-    log::info "  Source repo:  [${repo}]"
-    log::info "  Target dir:   [${dir}]"
-    log::info "  Verbosity:    [${verbosity}]"
-    log::info "  Batch:        [${batch}]"
-    log::info "  Help:         [${help}]"
+    log::debug "Arguments processed:"
+    log::debug "  Input:        [${args}]"
+    log::debug "  Used:         [${args_used}]"
+    log::debug "  Ignored:      [${args_ignored}]"
+    log::debug "Default settings:"
+    log::debug "  Source repo:  [${_APP[DEFAULT_REPO]}]"
+    log::debug "  Target dir:   [${_APP[DEFAULT_DIR]}]"
+    log::debug "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::debug "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::debug "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::debug "Effective settings:"
+    log::debug "  Source repo:  [${repo}]"
+    log::debug "  Target dir:   [${dir}]"
+    log::debug "  Verbosity:    [${verbosity}]"
+    log::debug "  Batch:        [${batch}]"
+    log::debug "  Help:         [${help}]"
 
     # Prompt user for confirmation, unless in batch mode.
     if dat::is_true "${batch}"; then

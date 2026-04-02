@@ -2,7 +2,10 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2024 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         [APP] Install Jekyll SSG
+# SPDX-FileComment: <text>  STATUS: DEPRECATED
+#   - Logic moved into lib/manifests/060--jekyll-ssg.zsh
+#   - Script retained for reference and future use.
+# </text>
 # -----------------------------------------------------------------------------
 
 # Initialize script framework (use `dirname` and `printf` for portability).
@@ -186,18 +189,18 @@ function main() {
     batch=$(dat::validate_bool "batch flag" "${batch}" "${_APP[DEFAULT_BATCH]}") || return 1
 
     # Display all processed arguments.
-    log::info "Arguments processed:"
-    log::info "  Input:        [${args}]"
-    log::info "  Used:         [${args_used}]"
-    log::info "  Ignored:      [${args_ignored}]"
-    log::info "Default settings:"
-    log::info "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
-    log::info "  Batch:        [${_APP[DEFAULT_BATCH]}]"
-    log::info "  Help:         [${_APP[DEFAULT_HELP]}]"
-    log::info "Effective settings:"
-    log::info "  Verbosity:    [${verbosity}]"
-    log::info "  Batch mode:   [${batch}]"
-    log::info "  Help:         [${help}]"
+    log::debug "Arguments processed:"
+    log::debug "  Input:        [${args}]"
+    log::debug "  Used:         [${args_used}]"
+    log::debug "  Ignored:      [${args_ignored}]"
+    log::debug "Default settings:"
+    log::debug "  Verbosity:    [${_APP[DEFAULT_VERBOSITY]}]"
+    log::debug "  Batch:        [${_APP[DEFAULT_BATCH]}]"
+    log::debug "  Help:         [${_APP[DEFAULT_HELP]}]"
+    log::debug "Effective settings:"
+    log::debug "  Verbosity:    [${verbosity}]"
+    log::debug "  Batch mode:   [${batch}]"
+    log::debug "  Help:         [${help}]"
 
     # Prompt user for confirmation, unless in batch mode.
     if dat::is_true "${batch}"; then

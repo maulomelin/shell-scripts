@@ -49,6 +49,12 @@ function () {
             "export PATH=\"\${PATH}:/Applications/Visual Studio Code.app/Contents/Resources/app/bin\""
         )
         local vscode_config="${(F)vscode_config_array}"
-        cfg::update_manifest "${HOME}/.zprofile" "${vscode_config}" "${vscode_label}"
+        cfg::update_config "${HOME}/.zprofile" "${vscode_config}" "${vscode_label}" || {
+            log::error "Failed to set the VSCode CLI tool config in [${HOME}/.zprofile]."
+            log::error "Check the config and try again."
+            return 1
+        }
+        log::info "Run \"exec zsh\" to apply config updates."
     fi
-}
+
+} || return 1

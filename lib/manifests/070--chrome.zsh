@@ -21,6 +21,7 @@ function () {
         log::info "        [_] uBlock Origin"
         log::info "        [_] JSON Formatter"
         open https://www.google.com/chrome/
-        read -r "?Press Enter to continue after installation is complete..."
+        read -r "?Press Enter to continue..."
     fi
-}
+
+} || return 1

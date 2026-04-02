@@ -2,9 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Install command for personal shell scripts
-# SPDX-FileComment: <text>
-#   To install the shell scripts, run the following command in your terminal:
+# SPDX-FileComment: <text>  Install Personal Shell Scripts
 #   $ curl -fsSL https://raw.githubusercontent.com/maulomelin/shell-scripts/HEAD/install.zsh | zsh
 # </text>
 # -----------------------------------------------------------------------------

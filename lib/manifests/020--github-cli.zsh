@@ -21,4 +21,5 @@ function () {
         log::info "A browser window will open to complete the authentication process."
         gh auth login --git-protocol https --hostname github.com --web
     fi
-}
+
+} || return 1

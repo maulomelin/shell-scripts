@@ -11,9 +11,9 @@ function () {
     #   - Set this up first. It is a dependency for Homebrew and other tools.
     # --------------------------------------
     if xcode-select -p &> /dev/null ; then
-        log::info "Xcode Command Line Tools are installed."
+        log::info "Xcode is installed."
     else
-        log::info "Xcode Command Line Tools are not installed. Installing them..."
+        log::info "Xcode is not installed. Installing it..."
         xcode-select --install
         log::info "Please follow the prompts to complete the installation."
         read -r "?Press Enter to continue after installation is complete..."
@@ -37,7 +37,8 @@ function () {
             eval "$(/usr/local/bin/brew shellenv zsh)"
         else
             log::error "Homebrew was installed but not found at /usr/local/bin/brew."
-            sys::abort "Check the Homebrew installation and try again."
+            log::error "Check the Homebrew installation and try again."
+            return 1
         fi
     fi
 
@@ -92,7 +93,8 @@ function () {
     brew cleanup        # Remove old, unused versions of installed packages.
     brew doctor || {    # Check the system for potential issues.
         log::warning "Homebrew doctor found potential issues."
-        log::warning "Please review the output above and address any warnings or errors."
+        log::warning "Review the output above for warnings and/or errors."
         read -r "?Press Enter to continue..."
     }
-}
+
+} || return 1

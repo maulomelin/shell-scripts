@@ -2,8 +2,7 @@
 # -----------------------------------------------------------------------------
 # SPDX-FileCopyrightText:   (c) 2025 Mauricio Lomelin <maulomelin@gmail.com>
 # SPDX-License-Identifier:  MIT
-# SPDX-FileComment:         Namespace: LAB / Experiments Sandbox
-# SPDX-FileComment: <text>
+# SPDX-FileComment: <text>  [LAB] Experiments Sandbox
 #   - This is a testing ground for all kinds of experiments.
 #   - Every experiment is defined and named within its own function.
 #   - Follow the pattern for new experiments.
@@ -40,7 +39,7 @@ function experiment_0033() {
         "export xFOO=\"foo\""
     )
     local config_block="${(F)config_block_array}"
-    cfg::update_manifest "./zshrc.txt" "${config_block}" "${block_label}"
+    cfg::update_config "./zshrc.txt" "${config_block}" "${block_label}"
 }
 #experiment_0033 "${@}"
 
