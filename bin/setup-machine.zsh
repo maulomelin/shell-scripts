@@ -68,6 +68,8 @@ function run() {
     # Map function arguments to local variables.
     local batch="${1}"
 
+    # Execute all manifests in the manifests directory.
+    # Manifests are responsible for setting up apps, tools, and configs.
     local manifests_dirpath="${${(%):-%x}:A:h:h}/lib/manifests"
     local -a manifests=( ${manifests_dirpath}/*.zsh )
     local manifest

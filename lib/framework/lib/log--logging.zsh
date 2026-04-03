@@ -27,18 +27,11 @@ typeset -gA _LOG=(
     [INDENTATION]="+ " # · . +-
     [MULTILINE_MERGE_AND_SPLIT]=true  # (true|false) (Default: true)
     [MODULE_DEBUG]=false  # (true|false) (Default: false)
-    [DATETIME_FORMAT]=${REG[FORMAT_DATETIME_ISO8601]}
-    # TODO: Decide if these move to the global registry, REG[<key>].
-    [LOG_LEVEL_ALERT]=0
-    [LOG_LEVEL_ERROR]=1
-    [LOG_LEVEL_WARNING]=2
-    [LOG_LEVEL_INFO]=3
-    [LOG_LEVEL_DEBUG]=4
 )
 
 # Initialize public registry.
 typeset -gA LOG=(
-    [verbosity]=${REG[DEFAULT_VERBOSITY]}
+    [verbosity]=3
 )
 
 # -----------------------------------------------------------------------------
@@ -46,6 +39,10 @@ typeset -gA LOG=(
 # Args:     None.
 # Outputs:  Current verbosity level from the public registry.
 # Status:   Default status.
+# Details:
+#   - To address a bad module default value, this function always validates the
+#     curent verbosity level. If valid, it returns that. If invalid, it resets
+#     it to the global default value and returns that.
 # Notes:
 #   - Once tried to create a single getter/setter log::verbosity() function to
 #     use as `x=$(log::verbosity <level>)`. It needed to set a public registry
@@ -54,7 +51,13 @@ typeset -gA LOG=(
 #     work-arounds. Thus, we kept separate get/set functions.
 # -----------------------------------------------------------------------------
 function log::get_verbosity() {
-    echo "${LOG[verbosity]}"
+    if [[ ${LOG[verbosity]:-} =~ ${REG[REGEX_VERBOSITY]} ]]; then
+        echo ${LOG[verbosity]}
+    else
+        __debug_info "Current verbosity level is invalid [${LOG[verbosity]:-}]. Setting it to global default [${REG[DEFAULT_VERBOSITY]}]."
+        LOG[verbosity]=${REG[DEFAULT_VERBOSITY]}
+        echo "${LOG[verbosity]}"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -69,6 +72,9 @@ function log::get_verbosity() {
 # Details:
 #   - Validates <level>. If valid, the verbosity level in the public registry
 #     is set to <level>. If invalid, the verbosity level is not changed.
+#   - To address a bad module default value, this function always validates the
+#     curent verbosity level. If valid, it returns that. If invalid, it resets
+#     it to the global default value and returns that.
 # -----------------------------------------------------------------------------
 function log::set_verbosity() {
     local verbosity=${1:-}
@@ -76,7 +82,13 @@ function log::set_verbosity() {
         __debug_info "Setting verbosity level to [${verbosity}]."
         LOG[verbosity]=${verbosity}
     else
-        __debug_info "Invalid verbosity level [${verbosity}]. Staying at current level [${LOG[verbosity]}]."
+        __debug_info "Invalid verbosity level [${verbosity}]. Checking current level [${LOG[verbosity]}]."
+        if [[ ${LOG[verbosity]:-} =~ ${REG[REGEX_VERBOSITY]} ]]; then
+            __debug_info "Current verbosity level is valid [${LOG[verbosity]}] is valid. No changes made."
+        else
+            __debug_info "Current verbosity level is invalid [${LOG[verbosity]:-}]. Setting it to global default [${REG[DEFAULT_VERBOSITY]}]."
+            LOG[verbosity]=${REG[DEFAULT_VERBOSITY]}
+        fi
     fi
 }
 
@@ -120,15 +132,15 @@ function log::set_verbosity() {
 #   - Formatting functions format a log message by adding string prefixes
 #     and/or changing its display attributes via embedded SGR codes.
 # -----------------------------------------------------------------------------
-function log::alert()       { _print ${_LOG[LOG_LEVEL_ALERT]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "blink"         "$(_prefix "[ALERT] " "$(_indent "${@}")")")")" }
-function log::error()       { _print ${_LOG[LOG_LEVEL_ERROR]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_red"    "$(_prefix "[ERROR] " "$(_indent "${@}")")")")" }
-function log::warning()     { _print ${_LOG[LOG_LEVEL_WARNING]} "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_orange" "$(_prefix "[WARN]  " "$(_indent "${@}")")")")" }
-function log::info()        { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
-function log::info_header() { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_box "${@}")")")")")" }
-function log::info_start()  { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "START: " "${@}")")")")")" }
-function log::info_end()    { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "END: "   "${@}")")")")")" }
-function log::info_xxx()    { _print ${_LOG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "cyan"          "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
-function log::debug()       { _print ${_LOG[LOG_LEVEL_DEBUG]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_blue"   "$(_prefix "[DEBUG] " "$(_indent "${@}")")")")" }
+function log::alert()       { _print ${REG[LOG_LEVEL_ALERT]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_white"  "$(_prefix "[ALERT] " "$(_indent "${@}")")")")" }
+function log::error()       { _print ${REG[LOG_LEVEL_ERROR]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_red"    "$(_prefix "[ERROR] " "$(_indent "${@}")")")")" }
+function log::warning()     { _print ${REG[LOG_LEVEL_WARNING]} "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_orange" "$(_prefix "[WARN]  " "$(_indent "${@}")")")")" }
+function log::info()        { _print ${REG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
+function log::info_header() { _print ${REG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_box "${@}")")")")")" }
+function log::info_start()  { _print ${REG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "START: " "${@}")")")")")" }
+function log::info_end()    { _print ${REG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_green"  "$(_prefix "[INFO]  " "$(_indent "$(_prefix "END: "   "${@}")")")")")" }
+function log::info_xxx()    { _print ${REG[LOG_LEVEL_INFO]}    "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "cyan"          "$(_prefix "[INFO]  " "$(_indent "${@}")")")")" }
+function log::debug()       { _print ${REG[LOG_LEVEL_DEBUG]}   "$(_prefix "$(_format "dim" "$(_timestamp)")" "$(_format "bright_blue"   "$(_prefix "[DEBUG] " "$(_indent "${@}")")")")" }
 
 # -----------------------------------------------------------------------------
 # Syntax:   _print <level> [<string> ...]
@@ -301,7 +313,7 @@ function _timestamp() {
 
     # Set up local variables from module registry for easier access.
     local -r tab=${_LOG[TAB]}
-    local -r datetime_format=${_LOG[DATETIME_FORMAT]}
+    local -r datetime_format=${REG[FORMAT_DATETIME_ISO8601]}
     local datetime_stamp
 
     # Normalize inputs into a single multiline string.
@@ -643,7 +655,7 @@ function __print() {
     # Set up local variables from module registry for easier access.
     local -r indentation=${_LOG[INDENTATION]}
     local -r module_debug=${_LOG[MODULE_DEBUG]}
-    local -r datetime_format=${_LOG[DATETIME_FORMAT]}
+    local -r datetime_format=${REG[FORMAT_DATETIME_ISO8601]}
     local datetime_stamp
 
     if [[ ${module_debug:-false} == true ]]; then

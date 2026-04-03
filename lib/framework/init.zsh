@@ -43,19 +43,14 @@ setopt EXTENDED_GLOB   # Enable extended globbing features.
 #   - Run checks inside an anonymous function to keep the global scope clean.
 function () {
 
-    # Framework libraries.
+    # Enumerate all framework libraries.
+    #   - Definition libraries can be sourced in any order: They do not execute
+    #     any logic when sourced, all logic is inside functions, and top-level
+    #     variables have no dependencies on other libraries.
+    #   - If libraries are added in the future with dependencies on other
+    #     libraries when sourced, we must use a dependency tree sourcing model.
     local lib_dirpath="${${(%):-%x}:A:h}/lib"
-    local -a libs=(
-        "reg--global-registry.zsh"
-        "log--logging.zsh"
-        "sys--system.zsh"
-        "dat--data-types.zsh"
-        "env--environment-info.zsh"
-        "cfg--config-mgmt.zsh"
-        "err--error-handling.zsh"
-        "ded--code-graveyard.zsh"
-        # TODO: Add new libraries here.
-    )
+    local -a libs=( ${lib_dirpath}/*.zsh )
 
     # -----------------------------------------------------------------------------
     # Syntax:   _extract_function_names_from_file <file>
@@ -157,8 +152,8 @@ function () {
     local -a fns
     local lib
     for lib in ${libs[@]}; do
-        fns=( $(_extract_function_names_from_file "${lib_dirpath}/${lib}") )
-        _fnmap_add_source_to_function_names "${lib}" "${fns[@]}"
+        fns=( $(_extract_function_names_from_file "${lib}") )
+        _fnmap_add_source_to_function_names "${lib:t}" "${fns[@]}"
     done
 
     # Process the executable script.
@@ -178,8 +173,8 @@ function () {
     # Source common libraries if no collisions were detected.
     local lib
     for lib in "${libs[@]}" ; do
-        source "${lib_dirpath}/${lib}" || {
-            echo "\e[91mError: Failed to source library [${lib}]. Check the library file.\e[0m"
+        source "${lib}" || {
+            echo "\e[91mError: Failed to source library [${lib:t}]. Check the library file.\e[0m"
             return 1
         }
     done

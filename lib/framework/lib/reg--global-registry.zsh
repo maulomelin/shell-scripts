@@ -31,6 +31,13 @@ typeset -grA REG=(
     [REGEX_LOG_LEVEL]="^[01234]$"
     [REGEX_BATCH]="^(true|false)$"
 
+    # Log levels (LOG_LEVEL_).
+    [LOG_LEVEL_ALERT]=0
+    [LOG_LEVEL_ERROR]=1
+    [LOG_LEVEL_WARNING]=2
+    [LOG_LEVEL_INFO]=3
+    [LOG_LEVEL_DEBUG]=4
+
     # String formats (FORMAT_).
     #   - "The Z Shell Manual" v5.9, § 13.2.4, pg. 42.
     [FORMAT_DATETIME_ISO8601]="%Y-%m-%dT%H:%M:%S"
