@@ -24,7 +24,7 @@ fi
 
 # Prevent direct execution.
 if [[ ${ZSH_EVAL_CONTEXT} != *:file* ]]; then
-    echo "\033[91mError: This script must be sourced, not executed.\033[0m"
+    echo "\e[91mError: This script must be sourced, not executed.\e[0m"
     return 1
 fi
 
@@ -178,7 +178,10 @@ function () {
     # Source common libraries if no collisions were detected.
     local lib
     for lib in "${libs[@]}" ; do
-        source "${lib_dirpath}/${lib}"
+        source "${lib_dirpath}/${lib}" || {
+            echo "\e[91mError: Failed to source library [${lib}]. Check the library file.\e[0m"
+            return 1
+        }
     done
 
 } || return 1   # Catch and return any errors to the caller.
