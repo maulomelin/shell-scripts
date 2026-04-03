@@ -50,10 +50,10 @@ function () {
         "log--logging.zsh"
         "sys--system.zsh"
         "dat--data-types.zsh"
-        "env--environment.zsh"
-        "err--error-handling.zsh"
+        "env--environment-info.zsh"
         "cfg--config-mgmt.zsh"
-        "ded--graveyard.zsh"
+        "err--error-handling.zsh"
+        "ded--code-graveyard.zsh"
         # TODO: Add new libraries here.
     )
 

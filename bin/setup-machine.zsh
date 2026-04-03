@@ -100,7 +100,7 @@ function main() {
     verbosity=$(log::get_verbosity)                 # Get actual level.
 
     # Log script identifier to mark the start of all logging.
-    log::info_header "Set Up Environment"
+    log::info_header "Set Up Machine: Apps, Tools, and Configs"
 
     # Handle help requests before validating other inputs.
     help=$(dat::validate_bool "help flag" "${help}" "${_APP[DEFAULT_HELP]}") || return 1
